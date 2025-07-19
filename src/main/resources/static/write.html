@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>글쓰기 - Cursor Project</title>
+    <link rel="stylesheet" href="/css/write.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="write-card">
+            <div class="header">
+                <h1><i class="fas fa-edit"></i> 글쓰기</h1>
+                <p>새로운 게시글을 작성하세요</p>
+            </div>
+            
+            <form id="writeForm" class="write-form">
+                <div class="form-group">
+                    <label for="category">
+                        <i class="fas fa-tag"></i> 카테고리
+                    </label>
+                    <select id="category" name="category" required>
+                        <option value="">카테고리를 선택하세요</option>
+                        <option value="일반">일반</option>
+                        <option value="공지">공지</option>
+                        <option value="질문">질문</option>
+                        <option value="자유">자유</option>
+                        <option value="기술">기술</option>
+                    </select>
+                    <div class="validation-message" id="categoryMessage"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">
+                        <i class="fas fa-heading"></i> 제목
+                    </label>
+                    <input type="text" id="title" name="title" required 
+                           placeholder="제목을 입력하세요 (최대 200자)" maxlength="200">
+                    <div class="char-count">
+                        <span id="titleCharCount">0</span>/200
+                    </div>
+                    <div class="validation-message" id="titleMessage"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">
+                        <i class="fas fa-file-text"></i> 내용
+                    </label>
+                    <textarea id="content" name="content" required 
+                              placeholder="내용을 입력하세요" rows="15"></textarea>
+                    <div class="char-count">
+                        <span id="contentCharCount">0</span>자
+                    </div>
+                    <div class="validation-message" id="contentMessage"></div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> 취소
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> 등록하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 로딩 스피너 -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>게시글을 등록하는 중...</p>
+    </div>
+    
+    <!-- 성공/실패 메시지 모달 -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBtn" onclick="closeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/write.js?v=1.0"></script>
+</body>
+</html> 

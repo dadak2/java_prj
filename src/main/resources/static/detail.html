@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>게시글 상세보기 - Cursor Project</title>
+    <link rel="stylesheet" href="/css/detail.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="detail-card">
+            <!-- 게시글 헤더 -->
+            <div class="post-header">
+                <div class="post-meta">
+                    <span class="category" id="postCategory">
+                        <i class="fas fa-tag"></i> <span id="categoryText"></span>
+                    </span>
+                    <span class="post-date" id="postDate">
+                        <i class="fas fa-calendar"></i> <span id="dateText"></span>
+                    </span>
+                </div>
+                
+                <h1 class="post-title" id="postTitle"></h1>
+                
+                <div class="post-info">
+                    <div class="author-info">
+                        <i class="fas fa-user"></i>
+                        <span id="authorName"></span>
+                    </div>
+                    <div class="post-stats">
+                        <span class="stat">
+                            <i class="fas fa-eye"></i>
+                            <span id="viewCount">0</span>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-heart"></i>
+                            <span id="likeCount">0</span>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-comment"></i>
+                            <span id="commentCount">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 게시글 내용 -->
+            <div class="post-content">
+                <div class="content-text" id="postContent"></div>
+            </div>
+            
+            <!-- 액션 버튼 -->
+            <div class="post-actions">
+                <div class="action-buttons">
+                    <button class="btn btn-like" id="likeBtn" onclick="toggleLike()">
+                        <i class="fas fa-heart" id="likeIcon"></i>
+                        <span id="likeText">좋아요</span>
+                    </button>
+                    <button class="btn btn-comment" onclick="focusComment()">
+                        <i class="fas fa-comment"></i>
+                        댓글쓰기
+                    </button>
+                    <button class="btn btn-share" onclick="sharePost()">
+                        <i class="fas fa-share"></i>
+                        공유하기
+                    </button>
+                </div>
+                
+                <div class="author-actions" id="authorActions" style="display: none;">
+                    <button class="btn btn-edit" onclick="editPost()">
+                        <i class="fas fa-edit"></i>
+                        수정
+                    </button>
+                    <button class="btn btn-delete" onclick="deletePost()">
+                        <i class="fas fa-trash"></i>
+                        삭제
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 댓글 섹션 -->
+            <div class="comments-section">
+                <h3><i class="fas fa-comments"></i> 댓글</h3>
+                
+                <!-- 댓글 작성 폼 -->
+                <div class="comment-form">
+                    <textarea id="commentText" placeholder="댓글을 입력하세요..." rows="3"></textarea>
+                    <button class="btn btn-primary" onclick="submitComment()">
+                        <i class="fas fa-paper-plane"></i>
+                        댓글 작성
+                    </button>
+                </div>
+                
+                <!-- 댓글 목록 -->
+                <div class="comments-list" id="commentsList">
+                    <div class="no-comments">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>아직 댓글이 없습니다.</p>
+                        <p>첫 번째 댓글을 남겨보세요!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 하단 네비게이션 -->
+            <div class="bottom-navigation">
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    목록으로
+                </button>
+                <button class="btn btn-primary" onclick="goToWrite()">
+                    <i class="fas fa-edit"></i>
+                    글쓰기
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 로딩 스피너 -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>로딩 중...</p>
+    </div>
+    
+    <!-- 확인 모달 -->
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmTitle"></h3>
+                <span class="close" onclick="closeConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">취소</button>
+                <button class="btn btn-danger" id="confirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 메시지 모달 -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBtn" onclick="closeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/detail.js?v=1.0"></script>
+</body>
+</html> 
