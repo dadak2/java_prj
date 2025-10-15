@@ -10,7 +10,7 @@
  */
 
 // DOM 요소들
-const userNicknameElement = document.getElementById('userNickname');
+let userNicknameElement = null; // 동적으로 생성되므로 초기값을 null로 설정
 const postListElement = document.getElementById('postList');
 const paginationElement = document.getElementById('pagination');
 const searchInput = document.getElementById('searchInput');
@@ -54,34 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * 사용자 정보 표시
+ * 로그인 성공 후 처리
  */
-function displayUserInfo() {
-    try {
-        // 로컬 스토리지에서 사용자 정보 가져오기
-        const savedLoginInfo = localStorage.getItem('savedLoginInfo');
-        const userInfo = localStorage.getItem('userInfo');
-        
-        if (userInfo) {
-            const user = JSON.parse(userInfo);
-            userNicknameElement.textContent = user.nickname || '사용자';
-        } else if (savedLoginInfo) {
-            // 로그인 정보만 있는 경우
-            userNicknameElement.textContent = savedLoginInfo;
-        } else {
-            // 로그인 정보가 없는 경우 로그인 페이지로 리다이렉트
-            showModal('로그인 필요', '로그인이 필요한 페이지입니다.', 'error');
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 2000);
-            return;
-        }
-        
-        console.log('사용자 정보 표시됨:', userNicknameElement.textContent);
-        
-    } catch (error) {
-        console.error('사용자 정보 표시 오류:', error);
-        userNicknameElement.textContent = '사용자';
+function onLoginSuccess(data) {
+    // 사용자 정보 업데이트 (common.js의 함수 사용)
+    if (typeof displayUserInfo === 'function') {
+        displayUserInfo();
     }
 }
 
@@ -109,8 +87,8 @@ async function loadPosts() {
                 excerpt: board.content ? board.content.substring(0, 100) + (board.content.length > 100 ? '...' : '') : '',
                 category: board.category,
                 categoryName: getCategoryName(board.category),
-                author: board.authorNickname || '알 수 없음',
-                authorEmail: board.authorEmail,
+                author: board.author?.nickname || '알 수 없음',
+                authorEmail: board.author?.email,
                 createdAt: new Date(board.createdAt),
                 updatedAt: board.updatedAt ? new Date(board.updatedAt) : null,
                 views: board.viewCount || 0,
@@ -387,60 +365,26 @@ function viewPost(postId) {
  */
 function goToWrite() {
     console.log('글쓰기 페이지로 이동');
+    
+    // 로그인 상태 확인
+    const userInfo = localStorage.getItem('userInfo');
+    const savedLoginInfo = localStorage.getItem('savedLoginInfo');
+    
+    if (!userInfo && !savedLoginInfo) {
+        showModal('로그인 필요', '글쓰기를 위해서는 로그인이 필요합니다.', 'info', () => {
+            console.log('로그인 모달 확인');
+            showLoginModal();
+        });
+        return;
+    }
+    
     // 글쓰기 페이지로 이동
     window.location.href = '/write.html';
 }
 
-/**
- * 로그아웃 처리
- */
-function logout() {
-    showModal('로그아웃', '정말 로그아웃하시겠습니까?', 'confirm');
-    
-    // 확인 버튼 클릭 시 로그아웃 실행
-    modalBtn.onclick = function() {
-        // 로컬 스토리지에서 사용자 정보 삭제
-        localStorage.removeItem('userInfo');
-        localStorage.removeItem('savedLoginInfo');
-        
-        showModal('로그아웃 완료', '로그아웃되었습니다. 로그인 페이지로 이동합니다.', 'success');
-        
-        setTimeout(() => {
-            window.location.href = '/login.html';
-        }, 2000);
-    };
-}
+// 로그아웃 함수는 common.js에서 제공됩니다.
 
-/**
- * 모달 메시지 표시
- */
-function showModal(title, message, type) {
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
-    
-    // 타입에 따른 스타일 적용
-    if (type === 'success') {
-        modalTitle.style.color = '#28a745';
-    } else if (type === 'error') {
-        modalTitle.style.color = '#dc3545';
-    } else if (type === 'info') {
-        modalTitle.style.color = '#17a2b8';
-    } else if (type === 'confirm') {
-        modalTitle.style.color = '#ffc107';
-    }
-    
-    messageModal.style.display = 'flex';
-    
-    // 확인 버튼 기본 동작 복원
-    modalBtn.onclick = closeModal;
-}
-
-/**
- * 모달 닫기
- */
-function closeModal() {
-    messageModal.style.display = 'none';
-}
+// 모달 관련 함수들은 common.js에서 제공됩니다.
 
 /**
  * 날짜 포맷팅
@@ -476,16 +420,4 @@ function debounce(func, wait) {
     };
 }
 
-// 모달 외부 클릭 시 닫기
-window.addEventListener('click', function(event) {
-    if (event.target === messageModal) {
-        closeModal();
-    }
-});
-
-// ESC 키로 모달 닫기
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' && messageModal.style.display === 'flex') {
-        closeModal();
-    }
-}); 
+// 모달 관련 이벤트 리스너는 common.js에서 처리됩니다. 

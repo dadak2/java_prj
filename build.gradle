@@ -30,6 +30,20 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+	
+	// WebSocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	
+	// JSON 처리
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	//MariaDB JDBC 드라이버

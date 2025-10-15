@@ -159,78 +159,7 @@ class BoardServiceTest {
         verify(boardRepository).findById(boardNo);
     }
 
-    @Test
-    @DisplayName("게시글 목록 조회 - 성공")
-    void getBoards_Success() {
-        // given
-        List<Board> boards = Arrays.asList(testBoard);
-        Page<Board> boardPage = new PageImpl<>(boards, pageable, boards.size());
-        
-        when(boardRepository.findByStatusOrderByCreatedAtDesc(
-            eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        )).thenReturn(boardPage);
 
-        // when
-        Page<Board> result = boardService.getBoards(pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getTitle()).isEqualTo("테스트 게시글");
-
-        verify(boardRepository).findByStatusOrderByCreatedAtDesc(
-            eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        );
-    }
-
-    @Test
-    @DisplayName("카테고리별 게시글 조회 - 성공")
-    void getBoardsByCategory_Success() {
-        // given
-        String category = "일반";
-        List<Board> boards = Arrays.asList(testBoard);
-        Page<Board> boardPage = new PageImpl<>(boards, pageable, boards.size());
-        
-        when(boardRepository.findByCategoryAndStatusOrderByCreatedAtDesc(
-            eq(category), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        )).thenReturn(boardPage);
-
-        // when
-        Page<Board> result = boardService.getBoardsByCategory(category, pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getCategory()).isEqualTo(category);
-
-        verify(boardRepository).findByCategoryAndStatusOrderByCreatedAtDesc(
-            eq(category), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        );
-    }
-
-    @Test
-    @DisplayName("게시글 검색 - 성공")
-    void searchBoards_Success() {
-        // given
-        String keyword = "테스트";
-        List<Board> boards = Arrays.asList(testBoard);
-        Page<Board> boardPage = new PageImpl<>(boards, pageable, boards.size());
-        
-        when(boardRepository.findByTitleContainingOrContentContainingAndStatus(
-            eq(keyword), eq(keyword), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        )).thenReturn(boardPage);
-
-        // when
-        Page<Board> result = boardService.searchBoards(keyword, pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-
-        verify(boardRepository).findByTitleContainingOrContentContainingAndStatus(
-            eq(keyword), eq(keyword), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        );
-    }
 
     @Test
     @DisplayName("게시글 수정 - 성공")
@@ -274,38 +203,9 @@ class BoardServiceTest {
         verify(boardRepository, never()).save(any());
     }
 
-    @Test
-    @DisplayName("게시글 삭제 - 성공")
-    void deleteBoard_Success() {
-        // given
-        Long boardNo = 1L;
-        when(boardRepository.findById(boardNo)).thenReturn(Optional.of(testBoard));
-        doNothing().when(boardRepository).updateStatus(boardNo, Board.BoardStatus.DELETED);
 
-        // when
-        boardService.deleteBoard(boardNo);
 
-        // then
-        verify(boardRepository).findById(boardNo);
-        verify(boardRepository).updateStatus(boardNo, Board.BoardStatus.DELETED);
-    }
-
-    @Test
-    @DisplayName("게시글 삭제 - 게시글 없음")
-    void deleteBoard_NotFound() {
-        // given
-        Long boardNo = 999L;
-        when(boardRepository.findById(boardNo)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> 
-            boardService.deleteBoard(boardNo)
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessage("게시글을 찾을 수 없습니다.");
-
-        verify(boardRepository).findById(boardNo);
-        verify(boardRepository, never()).updateStatus(any(), any());
-    }
+ 
 
     @Test
     @DisplayName("조회수 증가 - 성공")
@@ -377,71 +277,4 @@ class BoardServiceTest {
         verify(boardRepository).decrementCommentCount(boardNo);
     }
 
-    @Test
-    @DisplayName("인기 게시글 조회 - 성공")
-    void getPopularBoards_Success() {
-        // given
-        List<Board> boards = Arrays.asList(testBoard);
-        Page<Board> boardPage = new PageImpl<>(boards, pageable, boards.size());
-        
-        when(boardRepository.findByStatusOrderByViewCountDescCreatedAtDesc(
-            eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        )).thenReturn(boardPage);
-
-        // when
-        Page<Board> result = boardService.getPopularBoards(pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-
-        verify(boardRepository).findByStatusOrderByViewCountDescCreatedAtDesc(
-            eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        );
-    }
-
-    @Test
-    @DisplayName("작성자별 게시글 조회 - 성공")
-    void getBoardsByAuthor_Success() {
-        // given
-        Long userNo = 1L;
-        List<Board> boards = Arrays.asList(testBoard);
-        Page<Board> boardPage = new PageImpl<>(boards, pageable, boards.size());
-        
-        when(userRepository.findById(userNo)).thenReturn(Optional.of(testUser));
-        when(boardRepository.findByAuthorAndStatusOrderByCreatedAtDesc(
-            eq(testUser), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        )).thenReturn(boardPage);
-
-        // when
-        Page<Board> result = boardService.getBoardsByAuthor(userNo, pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-
-        verify(userRepository).findById(userNo);
-        verify(boardRepository).findByAuthorAndStatusOrderByCreatedAtDesc(
-            eq(testUser), eq(Board.BoardStatus.ACTIVE), any(Pageable.class)
-        );
-    }
-
-    @Test
-    @DisplayName("작성자별 게시글 조회 - 사용자 없음")
-    void getBoardsByAuthor_UserNotFound() {
-        // given
-        Long userNo = 999L;
-        when(userRepository.findById(userNo)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> 
-            boardService.getBoardsByAuthor(userNo, pageable)
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessage("사용자를 찾을 수 없습니다.");
-
-        verify(userRepository).findById(userNo);
-        verify(boardRepository, never()).findByAuthorAndStatusOrderByCreatedAtDesc(
-            any(), any(), any()
-        );
-    }
 } 

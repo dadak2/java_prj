@@ -6,13 +6,27 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>게시글 상세보기 - Cursor Project</title>
+    <title>게시글</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/board.css?v=1.0">
     <link rel="stylesheet" href="/css/detail.css?v=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- 헤더 -->
+        <div id="header-container"></div>
+        
         <div class="detail-card">
+            <!-- 상단 네비게이션 -->
+            <div class="top-navigation">
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    목록
+                </button>
+            </div>
+            
             <!-- 게시글 헤더 -->
             <div class="post-header">
                 <div class="post-meta">
@@ -58,15 +72,13 @@
                 <div class="action-buttons">
                     <button class="btn btn-like" id="likeBtn" onclick="toggleLike()">
                         <i class="fas fa-heart" id="likeIcon"></i>
-                        <span id="likeText">좋아요</span>
+                        <span id="likeText"></span>
                     </button>
                     <button class="btn btn-comment" onclick="focusComment()">
                         <i class="fas fa-comment"></i>
-                        댓글쓰기
                     </button>
                     <button class="btn btn-share" onclick="sharePost()">
                         <i class="fas fa-share"></i>
-                        공유하기
                     </button>
                 </div>
                 
@@ -74,6 +86,14 @@
                     <button class="btn btn-edit" onclick="editPost()">
                         <i class="fas fa-edit"></i>
                         수정
+                    </button>
+                    <button class="btn btn-deactivate" id="deactivateBtn" onclick="deactivatePost()" style="display: none;">
+                        <i class="fas fa-eye-slash"></i>
+                        비활성화
+                    </button>
+                    <button class="btn btn-activate" id="activateBtn" onclick="activatePost()" style="display: none;">
+                        <i class="fas fa-eye"></i>
+                        활성화
                     </button>
                     <button class="btn btn-delete" onclick="deletePost()">
                         <i class="fas fa-trash"></i>
@@ -105,17 +125,6 @@
                 </div>
             </div>
             
-            <!-- 하단 네비게이션 -->
-            <div class="bottom-navigation">
-                <button class="btn btn-secondary" onclick="goBack()">
-                    <i class="fas fa-arrow-left"></i>
-                    목록으로
-                </button>
-                <button class="btn btn-primary" onclick="goToWrite()">
-                    <i class="fas fa-edit"></i>
-                    글쓰기
-                </button>
-            </div>
         </div>
     </div>
     
@@ -156,8 +165,13 @@
                 <button id="modalBtn" onclick="closeModal()">확인</button>
             </div>
         </div>
+        
+        <!-- 푸터 -->
+        <div id="footer-container"></div>
     </div>
     
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
     <script src="/js/detail.js?v=1.0"></script>
 </body>
 </html> 

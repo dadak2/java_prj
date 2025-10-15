@@ -41,19 +41,43 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param pageable 페이징 정보
      * @return 활성 게시글 페이지
      */
-    Page<Board> findByStatusOrderByCreatedAtDesc(Board.BoardStatus status, Pageable pageable);
+    Page<Board> findByIsActiveOrderByCreatedAtDesc(boolean isActive, Pageable pageable);
+    
+    /**
+     * 상태와 활성화 상태로 게시글 조회
+     * 
+     * @param isActive 게시글 상태
+     * @param pageable 페이징 정보
+     * @return 게시글 페이지
+     */
+    Page<Board> findByStatusAndIsActiveOrderByCreatedAtDesc(Board.BoardStatus status, boolean isActive, Pageable pageable);
     
     /**
      * 카테고리별 활성 게시글 조회
      * 
      * @param category 게시글 카테고리
-     * @param status 게시글 상태
+     * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 카테고리별 게시글 페이지
      */
-    Page<Board> findByCategoryAndStatusOrderByCreatedAtDesc(
+    Page<Board> findByCategoryAndIsActiveOrderByCreatedAtDesc(
         String category, 
-        Board.BoardStatus status, 
+        boolean isActive, 
+        Pageable pageable
+    );
+    
+    /**
+     * 카테고리별 활성화된 게시글 조회
+     * 
+     * @param category 게시글 카테고리
+     * @param isActive 활성화 상태
+     * @param pageable 페이징 정보
+     * @return 카테고리별 활성화된 게시글 페이지
+     */
+    Page<Board> findByCategoryAndStatusAndIsActiveOrderByCreatedAtDesc(
+        String category, 
+        Board.BoardStatus status,
+        boolean isActive, 
         Pageable pageable
     );
     
@@ -61,13 +85,13 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * 작성자별 게시글 조회
      * 
      * @param author 게시글 작성자
-     * @param status 게시글 상태
+     * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 작성자별 게시글 페이지
      */
-    Page<Board> findByAuthorAndStatusOrderByCreatedAtDesc(
+    Page<Board> findByAuthorAndIsActiveOrderByCreatedAtDesc(
         User author, 
-        Board.BoardStatus status, 
+        boolean isActive, 
         Pageable pageable
     );
     
@@ -76,54 +100,54 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * 
      * @param title 검색할 제목 키워드
      * @param content 검색할 내용 키워드
-     * @param status 게시글 상태
+     * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 검색 결과 페이지
      */
-    @Query("SELECT b FROM Board b WHERE b.status = :status AND " +
+    @Query("SELECT b FROM Board b WHERE b.isActive = :isActive AND " +
            "(LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')) OR " +
            "LOWER(b.content) LIKE LOWER(CONCAT('%', :content, '%'))) " +
            "ORDER BY b.createdAt DESC")
-    Page<Board> findByTitleContainingOrContentContainingAndStatus(
+    Page<Board> findByTitleContainingOrContentContainingAndIsActive(
         @Param("title") String title,
         @Param("content") String content,
-        @Param("status") Board.BoardStatus status,
+        @Param("isActive") boolean isActive,
         Pageable pageable
     );
     
     /**
      * 조회수 기준으로 인기 게시글 조회
      * 
-     * @param status 게시글 상태
+     * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 조회수 기준 인기 게시글 페이지
      */
-    Page<Board> findByStatusOrderByViewCountDescCreatedAtDesc(
-        Board.BoardStatus status, 
+    Page<Board> findByIsActiveOrderByViewCountDescCreatedAtDesc(
+        boolean isActive, 
         Pageable pageable
     );
     
     /**
      * 좋아요 수 기준으로 인기 게시글 조회
      * 
-     * @param status 게시글 상태
+     * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 좋아요 수 기준 인기 게시글 페이지
      */
-    Page<Board> findByStatusOrderByLikeCountDescCreatedAtDesc(
-        Board.BoardStatus status, 
+    Page<Board> findByIsActiveOrderByLikeCountDescCreatedAtDesc(
+        boolean isActive, 
         Pageable pageable
     );
     
     /**
      * 댓글 수 기준으로 인기 게시글 조회
      * 
-     * @param status 게시글 상태
+    * @param isActive 활성화 상태
      * @param pageable 페이징 정보
      * @return 댓글 수 기준 인기 게시글 페이지
      */
-    Page<Board> findByStatusOrderByCommentCountDescCreatedAtDesc(
-        Board.BoardStatus status, 
+    Page<Board> findByIsActiveOrderByCommentCountDescCreatedAtDesc(
+        boolean isActive, 
         Pageable pageable
     );
     
@@ -176,11 +200,29 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * 게시글 상태 변경 (삭제 처리)
      * 
      * @param boardNo 게시글 번호
-     * @param status 변경할 상태
+    * @param isActive 변경할 활성화 상태
      */
     @Modifying
-    @Query("UPDATE Board b SET b.status = :status WHERE b.boardNo = :boardNo")
-    void updateStatus(@Param("boardNo") Long boardNo, @Param("status") Board.BoardStatus status);
+    @Query("UPDATE Board b SET b.isActive = :isActive WHERE b.boardNo = :boardNo")
+    void updateIsActive(@Param("boardNo") Long boardNo, @Param("isActive") boolean isActive);
+    
+    /**
+     * 게시글 비활성화
+     * 
+     * @param boardNo 게시글 번호
+     */
+    @Modifying
+    @Query("UPDATE Board b SET b.isActive = false WHERE b.boardNo = :boardNo")
+    void deactivateBoard(@Param("boardNo") Long boardNo);
+    
+    /**
+     * 게시글 활성화
+     * 
+     * @param boardNo 게시글 번호
+     */
+    @Modifying
+    @Query("UPDATE Board b SET b.isActive = true WHERE b.boardNo = :boardNo")
+    void activateBoard(@Param("boardNo") Long boardNo);
     
     /**
      * 작성자의 게시글 수 조회
@@ -189,7 +231,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param status 게시글 상태
      * @return 게시글 수
      */
-    long countByAuthorAndStatus(User author, Board.BoardStatus status);
+    long countByAuthorAndIsActive(User author, boolean isActive);
     
     /**
      * 카테고리별 게시글 수 조회
@@ -198,15 +240,15 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param status 게시글 상태
      * @return 게시글 수
      */
-    long countByCategoryAndStatus(String category, Board.BoardStatus status);
+    long countByCategoryAndIsActive(String category, boolean isActive);
     
     /**
      * 전체 활성 게시글 수 조회
      * 
-     * @param status 게시글 상태
+     * @param isActive 게시글 상태
      * @return 게시글 수
      */
-    long countByStatus(Board.BoardStatus status);
+    long countByIsActive(boolean isActive);
     
     /**
      * 최근 게시글 조회 (메인 페이지용)
@@ -215,8 +257,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param limit 조회할 게시글 수
      * @return 최근 게시글 목록
      */
-    @Query("SELECT b FROM Board b WHERE b.status = :status ORDER BY b.createdAt DESC")
-    List<Board> findRecentBoards(@Param("status") Board.BoardStatus status, Pageable pageable);
+    @Query("SELECT b FROM Board b WHERE b.isActive = :isActive ORDER BY b.createdAt DESC")
+    List<Board> findRecentBoards(@Param("isActive") boolean isActive, Pageable pageable);
     
     /**
      * 인기 게시글 조회 (메인 페이지용)
@@ -225,6 +267,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
      * @param limit 조회할 게시글 수
      * @return 인기 게시글 목록
      */
-    @Query("SELECT b FROM Board b WHERE b.status = :status ORDER BY b.viewCount DESC, b.createdAt DESC")
-    List<Board> findPopularBoards(@Param("status") Board.BoardStatus status, Pageable pageable);
+    @Query("SELECT b FROM Board b WHERE b.isActive = :isActive ORDER BY b.viewCount DESC, b.createdAt DESC")
+    List<Board> findPopularBoards(@Param("isActive") boolean isActive, Pageable pageable);    
 } 

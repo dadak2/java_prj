@@ -18,101 +18,7 @@ body {
     flex-direction: column;
 }
 
-/* 헤더 스타일 */
-.header {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 70px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.logo i {
-    font-size: 2rem;
-    color: #667eea;
-}
-
-.logo h1 {
-    font-size: 1.5rem;
-    color: #333;
-    font-weight: 600;
-}
-
-.nav {
-    display: flex;
-    gap: 20px;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #666;
-    padding: 10px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.nav-link:hover {
-    background: #f8f9fa;
-    color: #667eea;
-}
-
-.nav-link.active {
-    background: #667eea;
-    color: white;
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.welcome-text {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-#userNickname {
-    color: #667eea;
-    font-weight: 600;
-}
-
-.logout-btn {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.logout-btn:hover {
-    background: #c82333;
-}
+/* 헤더와 푸터 스타일은 각각 header.css, footer.css에서 관리 */
 
 /* 메인 콘텐츠 */
 .main-content {
@@ -372,65 +278,9 @@ body {
     cursor: not-allowed;
 }
 
-/* 글쓰기 버튼 */
-.write-button-container {
-    text-align: center;
-}
+/* 글쓰기 버튼 스타일은 제거됨 (하단 글쓰기 버튼 삭제) */
 
-.write-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-}
-
-.write-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-/* 푸터 */
-.footer {
-    background: #333;
-    color: white;
-    padding: 30px 0;
-    margin-top: auto;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.footer-links {
-    display: flex;
-    gap: 20px;
-}
-
-.footer-links a {
-    color: #ccc;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-    color: white;
-}
+/* 푸터 스타일은 footer.css에서 관리 */
 
 /* 로딩 스피너 */
 .loading-spinner {

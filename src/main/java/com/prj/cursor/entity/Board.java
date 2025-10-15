@@ -89,6 +89,15 @@ public class Board {
     private BoardStatus status = BoardStatus.ACTIVE;
     
     /**
+     * 게시글 활성화 상태
+     * true: 활성화된 게시글 (표시됨)
+     * false: 비활성화된 게시글 (숨김)
+     */
+    @Column(name = "is_active")
+    @Builder.Default
+    private boolean isActive = true;
+    
+    /**
      * 생성일시
      * 자동으로 현재 시간 설정
      */
@@ -103,14 +112,6 @@ public class Board {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-    
-    /**
-     * 게시글 상태 열거형
-     */
-    public enum BoardStatus {
-        ACTIVE,    // 활성
-        DELETED    // 삭제됨
-    }
     
     /**
      * 게시글 정보 업데이트
@@ -168,5 +169,33 @@ public class Board {
                 "*".repeat(localPart.length() - 1);
         
         return maskedLocalPart + domainPart;
+    }
+    
+    /**
+     * 게시글 비활성화
+     * 
+     * 게시글을 비활성화하여 화면에 표시되지 않도록 합니다.
+     */
+    public void deactivate() {
+        this.isActive = false;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    /**
+     * 게시글 활성화
+     * 
+     * 게시글을 활성화하여 화면에 표시되도록 합니다.
+     */
+    public void activate() {
+        this.isActive = true;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
+    /**
+     * 게시글 상태 열거형
+     */
+    public enum BoardStatus {
+        ACTIVE,    // 활성
+        DELETED    // 삭제됨
     }
 }

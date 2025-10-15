@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!boardNo) {
         showModal('오류', '게시글 번호가 없습니다.', 'error', () => {
-            window.location.href = '/board.html';
+            window.location.href = '/';
         });
         return;
     }
@@ -39,9 +39,39 @@ async function loadPost(boardNo) {
         // 게시글 정보 표시
         displayPost(post);
         
+        // 디버깅 정보 출력
+        console.log('현재 사용자:', currentUser);
+        console.log('게시글 작성자:', post.author);
+        console.log('게시글 활성화 상태:', post.isActive);
+        
         // 작성자 액션 버튼 표시 여부 결정
-        if (currentUser && currentUser.userNo === post.author?.userNo) {
+        let canManagePost = false;
+        
+        if (currentUser && post.author && currentUser.userNo === post.author.userNo) {
+            console.log('작성자 권한 확인됨');
+            canManagePost = true;
+        }
+        
+        // 관리자 권한 확인 (관리자도 모든 게시글 관리 가능)
+        if (currentUser && currentUser.userRole === 'ADMIN') {
+            console.log('관리자 권한 확인됨');
+            canManagePost = true;
+        }
+        
+        console.log('게시글 관리 권한:', canManagePost);
+        
+        if (canManagePost) {
+            console.log('작성자 액션 버튼 표시');
             document.getElementById('authorActions').style.display = 'flex';
+            
+            // 게시글 활성화 상태에 따라 버튼 표시
+            if (post.isActive) {
+                document.getElementById('deactivateBtn').style.display = 'inline-block';
+                document.getElementById('activateBtn').style.display = 'none';
+            } else {
+                document.getElementById('deactivateBtn').style.display = 'none';
+                document.getElementById('activateBtn').style.display = 'inline-block';
+            }
         }
         
         // 댓글 로딩 (향후 구현)
@@ -50,7 +80,7 @@ async function loadPost(boardNo) {
     } catch (error) {
         console.error('게시글 로딩 오류:', error);
         showModal('오류', error.message || '게시글을 불러오는 중 오류가 발생했습니다.', 'error', () => {
-            window.location.href = '/board.html';
+            window.location.href = '/';
         });
     } finally {
         hideLoadingSpinner();
@@ -70,7 +100,7 @@ function displayPost(post) {
     document.getElementById('dateText').textContent = formatDate(createdDate);
     
     // 작성자
-    document.getElementById('authorName').textContent = post.authorNickname || '알 수 없음';
+    document.getElementById('authorName').textContent = post.author?.nickname || '알 수 없음';
     
     // 통계
     document.getElementById('viewCount').textContent = post.viewCount || 0;
@@ -108,7 +138,9 @@ function formatDate(date) {
 // 좋아요 토글
 async function toggleLike() {
     if (!currentUser) {
-        showModal('로그인 필요', '좋아요를 누르려면 로그인이 필요합니다.', 'error');
+        showModal('로그인 필요', '좋아요를 누르려면 로그인이 필요합니다.', 'info', () => {
+            showLoginModal();
+        });
         return;
     }
     
@@ -156,7 +188,9 @@ async function toggleLike() {
 // 댓글 작성
 async function submitComment() {
     if (!currentUser) {
-        showModal('로그인 필요', '댓글을 작성하려면 로그인이 필요합니다.', 'error');
+        showModal('로그인 필요', '댓글을 작성하려면 로그인이 필요합니다.', 'info', () => {
+            showLoginModal();
+        });
         return;
     }
     
@@ -226,6 +260,13 @@ function sharePost() {
 
 // 게시글 수정
 function editPost() {
+    if (!currentUser) {
+        showModal('로그인 필요', '게시글을 수정하려면 로그인이 필요합니다.', 'info', () => {
+            showLoginModal();
+        });
+        return;
+    }
+    
     if (!currentPost) return;
     
     showConfirmModal('게시글 수정', '게시글을 수정하시겠습니까?', () => {
@@ -236,6 +277,13 @@ function editPost() {
 
 // 게시글 삭제
 function deletePost() {
+    if (!currentUser) {
+        showModal('로그인 필요', '게시글을 삭제하려면 로그인이 필요합니다.', 'info', () => {
+            showLoginModal();
+        });
+        return;
+    }
+    
     if (!currentPost) return;
     
     showConfirmModal('게시글 삭제', '정말로 이 게시글을 삭제하시겠습니까?\n삭제된 게시글은 복구할 수 없습니다.', async () => {
@@ -246,7 +294,7 @@ function deletePost() {
             
             if (response.ok) {
                 showModal('삭제 완료', '게시글이 삭제되었습니다.', 'success', () => {
-                    window.location.href = '/board.html';
+                    window.location.href = '/';
                 });
             } else {
                 throw new Error('게시글 삭제에 실패했습니다.');
@@ -254,6 +302,70 @@ function deletePost() {
         } catch (error) {
             console.error('게시글 삭제 오류:', error);
             showModal('오류', error.message || '게시글 삭제 중 오류가 발생했습니다.', 'error');
+        }
+    });
+}
+
+// 게시글 비활성화
+function deactivatePost() {
+    if (!currentPost || !currentUser) return;
+    
+    showConfirmModal('게시글 비활성화', '이 게시글을 비활성화하시겠습니까?\n비활성화된 게시글은 목록에서 보이지 않으며, 관련 댓글도 함께 비활성화됩니다.', async () => {
+        try {
+            const response = await fetch(`/api/boards/${currentPost.boardNo}/deactivate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userNo: currentUser.userNo
+                })
+            });
+            
+            if (response.ok) {
+                showModal('비활성화 완료', '게시글이 비활성화되었습니다.', 'success', () => {
+                    // 페이지 새로고침하여 변경사항 반영
+                    window.location.reload();
+                });
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '게시글 비활성화에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('게시글 비활성화 오류:', error);
+            showModal('오류', error.message || '게시글 비활성화 중 오류가 발생했습니다.', 'error');
+        }
+    });
+}
+
+// 게시글 활성화
+function activatePost() {
+    if (!currentPost || !currentUser) return;
+    
+    showConfirmModal('게시글 활성화', '이 게시글을 활성화하시겠습니까?\n활성화된 게시글은 목록에서 보이며, 관련 댓글도 함께 활성화됩니다.', async () => {
+        try {
+            const response = await fetch(`/api/boards/${currentPost.boardNo}/activate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userNo: currentUser.userNo
+                })
+            });
+            
+            if (response.ok) {
+                showModal('활성화 완료', '게시글이 활성화되었습니다.', 'success', () => {
+                    // 페이지 새로고침하여 변경사항 반영
+                    window.location.reload();
+                });
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '게시글 활성화에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('게시글 활성화 오류:', error);
+            showModal('오류', error.message || '게시글 활성화 중 오류가 발생했습니다.', 'error');
         }
     });
 }
@@ -288,6 +400,17 @@ function hideLoadingSpinner() {
     }
 }
 
+// 로그인 성공 후 처리
+function onLoginSuccess(data) {
+    // 현재 사용자 정보 업데이트
+    currentUser = data.user;
+    
+    // 페이지 새로고침하여 UI 업데이트
+    setTimeout(() => {
+        window.location.reload();
+    }, 1500);
+}
+
 // 모달 표시
 function showModal(title, message, type = 'info', callback = null) {
     const modal = document.getElementById('messageModal');
@@ -296,6 +419,12 @@ function showModal(title, message, type = 'info', callback = null) {
     const modalBtn = document.getElementById('modalBtn');
     
     if (modal && modalTitle && modalMessage && modalBtn) {
+        // 기존 타입 클래스 제거
+        modal.classList.remove('error', 'success', 'info');
+        
+        // 새로운 타입 클래스 추가
+        modal.classList.add(type);
+        
         modalTitle.textContent = title;
         modalMessage.textContent = message;
         

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 - Cursor Project</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/board.css?v=1.0">
+    <link rel="stylesheet" href="/css/game.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="header-container"></div>
+        
+        <main class="main-content">
+            <div class="game-container">
+                <div class="game-area">
+                    <h2>스네이크 게임</h2>
+                    <canvas id="gameCanvas" width="600" height="400"></canvas>
+                    <div class="game-ui">
+                        <div class="score-display">
+                            <span>점수: <span id="currentScore">0</span></span>
+                        </div>
+                        <div class="game-controls">
+                            <button id="startBtn" class="game-btn">게임 시작</button>
+                            <button id="pauseBtn" class="game-btn" disabled>일시정지</button>
+                            <button id="resetBtn" class="game-btn">리셋</button>
+                        </div>
+                        <div class="game-instructions">
+                            <p>방향키로 뱀을 조작하세요. 빨간 사과를 먹으면 점수가 올라갑니다!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ranking-area">
+                    <h3><i class="fas fa-trophy"></i> 실시간 랭킹</h3>
+                    <div id="rankingList" class="ranking-list">
+                        <div class="loading">랭킹을 불러오는 중...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div id="footer-container"></div>
+    </div>
+    
+    <!-- 로그인 모달 -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>로그인</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">이메일:</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">비밀번호:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">로그인</button>
+            </form>
+            <p>계정이 없으신가요? <a href="#" onclick="showSignupModal()">회원가입</a></p>
+        </div>
+    </div>
+    
+    <!-- 회원가입 모달 -->
+    <div id="signupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>회원가입</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupEmail">이메일:</label>
+                    <input type="email" id="signupEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">비밀번호:</label>
+                    <input type="password" id="signupPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupNickname">닉네임:</label>
+                    <input type="text" id="signupNickname" name="nickname" required>
+                </div>
+                <button type="submit" class="signup-btn">회원가입</button>
+            </form>
+            <p>이미 계정이 있으신가요? <a href="#" onclick="showLoginModal()">로그인</a></p>
+        </div>
+    </div>
+    
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
+    <script src="/js/game.js?v=1.0"></script>
+</body>
+</html>

@@ -37,6 +37,51 @@ body {
     }
 }
 
+/* 상단 네비게이션 */
+.top-navigation {
+    padding: 20px 40px;
+    border-bottom: 1px solid #e1e5e9;
+    display: flex;
+    gap: 15px;
+    background: #f8f9fa;
+}
+
+.top-navigation .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.top-navigation .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.top-navigation .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.top-navigation .btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.top-navigation .btn-primary:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 /* 게시글 헤더 */
 .post-header {
     padding: 40px 40px 30px;
@@ -351,15 +396,7 @@ body {
     word-break: break-word;
 }
 
-/* 하단 네비게이션 */
-.bottom-navigation {
-    padding: 30px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8f9fa;
-    border-top: 1px solid #e1e5e9;
-}
+/* 하단 네비게이션 스타일은 제거됨 (상단 네비게이션으로 변경) */
 
 /* 로딩 스피너 */
 .loading-spinner {
@@ -473,6 +510,60 @@ body {
     justify-content: flex-end;
 }
 
+.modal-footer button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.modal-footer button:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.modal-footer button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* 삭제/위험 타입 모달 버튼 - 빨간색 */
+.modal.error .modal-footer button {
+    background: #dc3545;
+}
+
+.modal.error .modal-footer button:hover {
+    background: #c82333;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* 성공 타입 모달 버튼 - 초록색 */
+.modal.success .modal-footer button {
+    background: #28a745;
+}
+
+.modal.success .modal-footer button:hover {
+    background: #218838;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* 정보/로그인 필요 타입 모달 버튼 - 파란색 */
+.modal.info .modal-footer button {
+    background: #667eea;
+}
+
+.modal.info .modal-footer button:hover {
+    background: #5a6fd8;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .container {
@@ -516,22 +607,14 @@ body {
         justify-content: center;
     }
     
-    .bottom-navigation {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .bottom-navigation .btn {
-        width: 100%;
-    }
+    /* bottom-navigation 스타일 제거됨 */
 }
 
 @media (max-width: 480px) {
     .post-header,
     .post-content,
     .post-actions,
-    .comments-section,
-    .bottom-navigation {
+    .comments-section {
         padding: 15px;
     }
     
@@ -555,4 +638,50 @@ body {
     .comment-form textarea {
         padding: 12px;
     }
+}
+
+/* 비활성화/활성화 버튼 스타일 */
+.btn-deactivate {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-deactivate:hover {
+    background: linear-gradient(135deg, #ff5252, #e53e3e);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.btn-activate {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-activate:hover {
+    background: linear-gradient(135deg, #38b2ac, #319795);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(78, 205, 196, 0.3);
+}
+
+.btn-deactivate i,
+.btn-activate i {
+    margin-right: 8px;
+}
+
+/* 비활성화된 게시글 표시 */
+.post-inactive {
+    opacity: 0.6;
+    background: #f8f9fa;
+    border-left: 4px solid #ff6b6b;
+}
+
+.post-inactive .post-title::after {
+    content: " (비활성화됨)";
+    color: #ff6b6b;
+    font-size: 0.8em;
+    font-weight: normal;
 } 

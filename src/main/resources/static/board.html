@@ -6,38 +6,16 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>게시판 - Cursor Project</title>
+    <title>게시판</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
     <link rel="stylesheet" href="/css/board.css?v=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <!-- 헤더 -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-code"></i>
-                    <h1>Cursor Project</h1>
-                </div>
-                <nav class="nav">
-                    <a href="/board.html" class="nav-link active">
-                        <i class="fas fa-list"></i> 게시판
-                    </a>
-                    <a href="/write.html" class="nav-link">
-                        <i class="fas fa-edit"></i> 글쓰기
-                    </a>
-                    <a href="/profile.html" class="nav-link">
-                        <i class="fas fa-user"></i> 프로필
-                    </a>
-                </nav>
-                <div class="user-menu">
-                    <span class="welcome-text">환영합니다, <span id="userNickname">사용자</span>님!</span>
-                    <button class="logout-btn" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> 로그아웃
-                    </button>
-                </div>
-            </div>
-        </header>
+        <div id="header-container"></div>
 
         <!-- 메인 콘텐츠 -->
         <main class="main-content">
@@ -93,25 +71,10 @@
                 </div>
             </div>
 
-            <!-- 글쓰기 버튼 -->
-            <div class="write-button-container">
-                <button class="write-btn" onclick="goToWrite()">
-                    <i class="fas fa-edit"></i> 글쓰기
-                </button>
-            </div>
         </main>
 
         <!-- 푸터 -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>&copy; 2024 Cursor Project. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="/about.html">소개</a>
-                    <a href="/terms.html">이용약관</a>
-                    <a href="/privacy.html">개인정보처리방침</a>
-                </div>
-            </div>
-        </footer>
+        <div id="footer-container"></div>
     </div>
 
     <!-- 로딩 스피너 -->
@@ -136,6 +99,10 @@
         </div>
     </div>
 
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>    
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
     <script src="/js/board.js?v=1.0"></script>
 </body>
 </html> 

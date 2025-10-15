@@ -18,7 +18,7 @@ public class CursorApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void applicationReady() {
 		System.out.println("==========================================");
-		System.out.println("## Cursor 프로젝트가 성공적으로 시작되었습니다!");
+		System.out.println("## Spring 프로젝트가 성공적으로 시작되었습니다!");
 		System.out.println("==========================================");
 		System.out.println("📱 메인 페이지: http://localhost:9090");
 		System.out.println("==========================================");

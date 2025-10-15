@@ -18,44 +18,44 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
     
     /**
-     * 루트 경로 접속 시 로그인 페이지로 리다이렉트
+     * 루트 경로 접속 시 게시판 페이지로 리다이렉트
      * 
      * 사용자가 http://localhost:9090/ 에 접속하면
-     * 자동으로 로그인 페이지로 이동합니다.
+     * 자동으로 게시판 페이지로 이동합니다.
      * 
-     * @return 로그인 페이지로 리다이렉트
+     * @return 게시판 페이지로 리다이렉트
      */
     @GetMapping("/")
-    public String redirectToLogin() {
-        log.info("루트 경로 접속 - 로그인 페이지로 리다이렉트");
-        return "redirect:/login.html";
+    public String redirectToBoard() {
+        log.info("루트 경로 접속 - 게시판 페이지로 리다이렉트");
+        return "redirect:/index.html";
     }
     
     /**
-     * 메인 페이지 접속 시 로그인 페이지로 리다이렉트
+     * 메인 페이지 접속 시 게시판 페이지로 리다이렉트
      * 
      * 사용자가 http://localhost:9090/main 에 접속하면
-     * 자동으로 로그인 페이지로 이동합니다.
+     * 자동으로 게시판 페이지로 이동합니다.
      * 
-     * @return 로그인 페이지로 리다이렉트
+     * @return 게시판 페이지로 리다이렉트
      */
     @GetMapping("/main")
-    public String redirectToLoginFromMain() {
-        log.info("메인 페이지 접속 - 로그인 페이지로 리다이렉트");
-        return "redirect:/login.html";
+    public String redirectToBoardFromMain() {
+        log.info("메인 페이지 접속 - 게시판 페이지로 리다이렉트");
+        return "redirect:/index.html";
     }
     
     /**
-     * 홈 페이지 접속 시 로그인 페이지로 리다이렉트
+     * 홈 페이지 접속 시 게시판 페이지로 리다이렉트
      * 
      * 사용자가 http://localhost:9090/home 에 접속하면
-     * 자동으로 로그인 페이지로 이동합니다.
+     * 자동으로 게시판 페이지로 이동합니다.
      * 
-     * @return 로그인 페이지로 리다이렉트
+     * @return 게시판 페이지로 리다이렉트
      */
     @GetMapping("/home")
-    public String redirectToLoginFromHome() {
-        log.info("홈 페이지 접속 - 로그인 페이지로 리다이렉트");
-        return "redirect:/login.html";
+    public String redirectToBoardFromHome() {
+        log.info("홈 페이지 접속 - 게시판 페이지로 리다이렉트");
+        return "redirect:/index.html";
     }
 } 

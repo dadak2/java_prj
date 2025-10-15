@@ -6,12 +6,18 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>글쓰기 - Cursor Project</title>
+    <title>글쓰기</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/board.css?v=1.0">
     <link rel="stylesheet" href="/css/write.css?v=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- 헤더 -->
+        <div id="header-container"></div>
+        
         <div class="write-card">
             <div class="header">
                 <h1><i class="fas fa-edit"></i> 글쓰기</h1>
@@ -90,8 +96,13 @@
                 <button id="modalBtn" onclick="closeModal()">확인</button>
             </div>
         </div>
+        
+        <!-- 푸터 -->
+        <div id="footer-container"></div>
     </div>
     
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
     <script src="/js/write.js?v=1.0"></script>
 </body>
 </html> 

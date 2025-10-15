@@ -55,7 +55,7 @@ public class BoardController {
      * @return 게시글 목록 페이지
      */
     @GetMapping
-    public ResponseEntity<Page<Board>> getBoards(
+    public ResponseEntity<Page<BoardResponse>> getBoards(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
@@ -64,7 +64,10 @@ public class BoardController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Board> boards = boardService.getBoards(pageable);
         
-        return ResponseEntity.ok(boards);
+        // Board 엔티티를 BoardResponse로 변환
+        Page<BoardResponse> boardResponses = boards.map(BoardResponse::from);
+        
+        return ResponseEntity.ok(boardResponses);
     }
 
     /**
@@ -179,6 +182,74 @@ public class BoardController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+    
+    /**
+     * 게시글 비활성화
+     * 
+     * 게시글과 관련 댓글들을 비활성화하여 화면에 표시되지 않도록 합니다.
+     * 관리자 또는 작성자만 가능합니다.
+     * 
+     * @param boardNo 게시글 번호
+     * @param request 비활성화 요청 데이터
+     * @return 비활성화 결과 메시지
+     */
+    @PostMapping("/{boardNo}/deactivate")
+    public ResponseEntity<Map<String, String>> deactivateBoard(
+            @PathVariable Long boardNo,
+            @RequestBody BoardDeactivateRequest request) {
+        
+        log.info("게시글 비활성화 API 호출 - 게시글 번호: {}, 사용자 번호: {}", boardNo, request.getUserNo());
+        
+        try {
+            boardService.deactivateBoard(boardNo, request.getUserNo());
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "게시글이 비활성화되었습니다.");
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            log.error("게시글 비활성화 실패 - 게시글 번호: {}, 오류: {}", boardNo, e.getMessage());
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    /**
+     * 게시글 활성화
+     * 
+     * 비활성화된 게시글과 관련 댓글들을 활성화하여 화면에 표시되도록 합니다.
+     * 관리자 또는 작성자만 가능합니다.
+     * 
+     * @param boardNo 게시글 번호
+     * @param request 활성화 요청 데이터
+     * @return 활성화 결과 메시지
+     */
+    @PostMapping("/{boardNo}/activate")
+    public ResponseEntity<Map<String, String>> activateBoard(
+            @PathVariable Long boardNo,
+            @RequestBody BoardActivateRequest request) {
+        
+        log.info("게시글 활성화 API 호출 - 게시글 번호: {}, 사용자 번호: {}", boardNo, request.getUserNo());
+        
+        try {
+            boardService.activateBoard(boardNo, request.getUserNo());
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "게시글이 활성화되었습니다.");
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            log.error("게시글 활성화 실패 - 게시글 번호: {}, 오류: {}", boardNo, e.getMessage());
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
     /**
      * 카테고리별 게시글 조회
@@ -191,7 +262,7 @@ public class BoardController {
      * @return 카테고리별 게시글 목록
      */
     @GetMapping("/category/{category}")
-    public ResponseEntity<Page<Board>> getBoardsByCategory(
+    public ResponseEntity<Page<BoardResponse>> getBoardsByCategory(
             @PathVariable String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -201,7 +272,10 @@ public class BoardController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Board> boards = boardService.getBoardsByCategory(category, pageable);
         
-        return ResponseEntity.ok(boards);
+        // Board 엔티티를 BoardResponse로 변환
+        Page<BoardResponse> boardResponses = boards.map(BoardResponse::from);
+        
+        return ResponseEntity.ok(boardResponses);
     }
 
     /**
@@ -215,7 +289,7 @@ public class BoardController {
      * @return 검색 결과 게시글 목록
      */
     @GetMapping("/search")
-    public ResponseEntity<Page<Board>> searchBoards(
+    public ResponseEntity<Page<BoardResponse>> searchBoards(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -225,7 +299,10 @@ public class BoardController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Board> boards = boardService.searchBoards(keyword, pageable);
         
-        return ResponseEntity.ok(boards);
+        // Board 엔티티를 BoardResponse로 변환
+        Page<BoardResponse> boardResponses = boards.map(BoardResponse::from);
+        
+        return ResponseEntity.ok(boardResponses);
     }
 
     /**
@@ -238,7 +315,7 @@ public class BoardController {
      * @return 인기 게시글 목록
      */
     @GetMapping("/popular")
-    public ResponseEntity<Page<Board>> getPopularBoards(
+    public ResponseEntity<Page<BoardResponse>> getPopularBoards(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
@@ -247,7 +324,10 @@ public class BoardController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Board> boards = boardService.getPopularBoards(pageable);
         
-        return ResponseEntity.ok(boards);
+        // Board 엔티티를 BoardResponse로 변환
+        Page<BoardResponse> boardResponses = boards.map(BoardResponse::from);
+        
+        return ResponseEntity.ok(boardResponses);
     }
 
     /**
@@ -261,7 +341,7 @@ public class BoardController {
      * @return 작성자별 게시글 목록
      */
     @GetMapping("/author/{userNo}")
-    public ResponseEntity<Page<Board>> getBoardsByAuthor(
+    public ResponseEntity<Page<BoardResponse>> getBoardsByAuthor(
             @PathVariable Long userNo,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -272,7 +352,10 @@ public class BoardController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Board> boards = boardService.getBoardsByAuthor(userNo, pageable);
             
-            return ResponseEntity.ok(boards);
+            // Board 엔티티를 BoardResponse로 변환
+            Page<BoardResponse> boardResponses = boards.map(BoardResponse::from);
+            
+            return ResponseEntity.ok(boardResponses);
         } catch (IllegalArgumentException e) {
             log.error("작성자별 게시글 조회 실패 - 사용자 번호: {}, 오류: {}", userNo, e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -447,5 +530,29 @@ public class BoardController {
         
         public String getCategory() { return category; }
         public void setCategory(String category) { this.category = category; }
+    }
+    
+    /**
+     * 게시글 비활성화 요청 DTO
+     */
+    public static class BoardDeactivateRequest {
+        @NotNull(message = "사용자 번호는 필수입니다.")
+        private Long userNo;
+
+        // Getters and Setters
+        public Long getUserNo() { return userNo; }
+        public void setUserNo(Long userNo) { this.userNo = userNo; }
+    }
+    
+    /**
+     * 게시글 활성화 요청 DTO
+     */
+    public static class BoardActivateRequest {
+        @NotNull(message = "사용자 번호는 필수입니다.")
+        private Long userNo;
+
+        // Getters and Setters
+        public Long getUserNo() { return userNo; }
+        public void setUserNo(Long userNo) { this.userNo = userNo; }
     }
 } 

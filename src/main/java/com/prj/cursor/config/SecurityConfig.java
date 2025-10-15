@@ -23,21 +23,22 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
+                // 모든 정적 리소스 허용
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico", "/error").permitAll()
+                // 모든 HTML 페이지 허용 (클라이언트에서 로그인 체크)
+                .requestMatchers("/*.html").permitAll()
                 .requestMatchers("/").permitAll()
-                .requestMatchers("/index.html").permitAll()
-                .requestMatchers("/signup.html").permitAll()
-                .requestMatchers("/login.html").permitAll()
-                .requestMatchers("/board.html").permitAll()
-                .requestMatchers("/write.html").permitAll()
-                .requestMatchers("/detail.html").permitAll()
-                .requestMatchers("/css/**").permitAll()
-                .requestMatchers("/js/**").permitAll()
+                // API 엔드포인트들
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/boards/**").permitAll()
+                .requestMatchers("/api/comments/**").permitAll()
+                .requestMatchers("/api/game/**").permitAll()
+                // WebSocket 엔드포인트
+                .requestMatchers("/ws/**").permitAll()
+                // 기타
                 .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/health").permitAll()
-                .requestMatchers("/test").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/health", "/test").permitAll()
+                .anyRequest().permitAll()
             );
         
         return http.build();

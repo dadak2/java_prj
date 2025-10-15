@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>내 정보 - Cursor Project</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/board.css?v=1.0">
+    <link rel="stylesheet" href="/css/profile.css?v=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div id="header-container"></div>
+        
+        <main class="main-content">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h1 id="profileName">사용자</h1>
+                        <p id="profileEmail">이메일</p>
+                        <span class="profile-role" id="profileRole">사용자</span>
+                    </div>
+                </div>
+                
+                <div class="profile-content">
+                    <div class="profile-section">
+                        <h3><i class="fas fa-user"></i> 기본 정보</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>닉네임</label>
+                                <span id="nicknameValue">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>이메일</label>
+                                <span id="emailValue">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>회원 등급</label>
+                                <span id="roleValue">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>가입일</label>
+                                <span id="joinDateValue">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h3><i class="fas fa-chart-bar"></i> 활동 통계</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="postCount">0</div>
+                                <div class="stat-label">작성한 글</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="commentCount">0</div>
+                                <div class="stat-label">작성한 댓글</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="totalViews">0</div>
+                                <div class="stat-label">총 조회수</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="totalLikes">0</div>
+                                <div class="stat-label">받은 좋아요</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="editProfile()">
+                            <i class="fas fa-edit"></i>
+                            정보 수정
+                        </button>
+                        <button class="btn btn-secondary" onclick="changePassword()">
+                            <i class="fas fa-key"></i>
+                            비밀번호 변경
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-trash"></i>
+                            계정 삭제
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 푸터 -->
+        <div id="footer-container"></div>
+    </div>
+    
+    <!-- 로딩 스피너 -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>로딩 중...</p>
+    </div>
+    
+    <!-- 메시지 모달 -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBtn" onclick="closeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
+    <script src="/js/profile.js?v=1.0"></script>
+</body>
+</html>

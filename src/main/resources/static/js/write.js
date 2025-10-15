@@ -29,7 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!currentUser || !currentUser.userNo) {
         console.log('로그인되지 않은 사용자. 로그인 페이지로 리다이렉트');
         showModal('로그인 필요', '글쓰기를 위해서는 로그인이 필요합니다.', 'error', () => {
-            window.location.href = '/login.html';
+            if (typeof showLoginModal === 'function') {
+                showLoginModal();
+            } else {
+                showModal('로그인 필요', '글쓰기를 위해서는 로그인이 필요합니다.', 'info');
+            }
         });
         return;
     }
@@ -195,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             showModal('등록 성공', '게시글이 성공적으로 등록되었습니다.', 'success', () => {
                 // 게시판 페이지로 이동
-                window.location.href = '/board.html';
+                window.location.href = '/';
             });
             
         } catch (error) {

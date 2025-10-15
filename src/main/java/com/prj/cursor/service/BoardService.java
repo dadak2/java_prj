@@ -3,6 +3,7 @@ package com.prj.cursor.service;
 import com.prj.cursor.entity.Board;
 import com.prj.cursor.entity.User;
 import com.prj.cursor.repository.BoardRepository;
+import com.prj.cursor.repository.CommentRepository;
 import com.prj.cursor.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * 게시글 생성
@@ -71,7 +73,7 @@ public class BoardService {
                 .viewCount(0L)
                 .likeCount(0L)
                 .commentCount(0L)
-                .status(Board.BoardStatus.ACTIVE)
+                .isActive(true)
                 .build();
         
         Board savedBoard = boardRepository.save(board);
@@ -102,7 +104,7 @@ public class BoardService {
     /**
      * 게시글 목록 조회
      * 
-     * 활성 상태의 모든 게시글을 페이징하여 조회합니다.
+     * 활성 상태이면서 활성화된 모든 게시글을 페이징하여 조회합니다.
      * 최신 게시글이 먼저 표시됩니다.
      * 
      * @param pageable 페이징 정보
@@ -112,8 +114,8 @@ public class BoardService {
         log.info("게시글 목록 조회 요청 - 페이지: {}, 크기: {}", 
                 pageable.getPageNumber(), pageable.getPageSize());
         
-        Page<Board> boards = boardRepository.findByStatusOrderByCreatedAtDesc(
-                Board.BoardStatus.ACTIVE, pageable);
+        Page<Board> boards = boardRepository.findByIsActiveOrderByCreatedAtDesc(
+                true, pageable);
         
         log.info("게시글 목록 조회 완료 - 총 개수: {}", boards.getTotalElements());
         return boards;
@@ -122,7 +124,7 @@ public class BoardService {
     /**
      * 카테고리별 게시글 조회
      * 
-     * 특정 카테고리의 활성 게시글을 페이징하여 조회합니다.
+     * 특정 카테고리의 활성 상태이면서 활성화된 게시글을 페이징하여 조회합니다.
      * 
      * @param category 게시글 카테고리
      * @param pageable 페이징 정보
@@ -131,8 +133,8 @@ public class BoardService {
     public Page<Board> getBoardsByCategory(String category, Pageable pageable) {
         log.info("카테고리별 게시글 조회 요청 - 카테고리: {}", category);
         
-        Page<Board> boards = boardRepository.findByCategoryAndStatusOrderByCreatedAtDesc(
-                category, Board.BoardStatus.ACTIVE, pageable);
+        Page<Board> boards = boardRepository.findByCategoryAndStatusAndIsActiveOrderByCreatedAtDesc(
+                category, Board.BoardStatus.ACTIVE, true, pageable);
         
         log.info("카테고리별 게시글 조회 완료 - 카테고리: {}, 개수: {}", 
                 category, boards.getTotalElements());
@@ -152,8 +154,8 @@ public class BoardService {
     public Page<Board> searchBoards(String keyword, Pageable pageable) {
         log.info("게시글 검색 요청 - 키워드: {}", keyword);
         
-        Page<Board> boards = boardRepository.findByTitleContainingOrContentContainingAndStatus(
-                keyword, keyword, Board.BoardStatus.ACTIVE, pageable);
+        Page<Board> boards = boardRepository.findByTitleContainingOrContentContainingAndIsActive(
+                keyword, keyword, true, pageable);
         
         log.info("게시글 검색 완료 - 키워드: {}, 결과 개수: {}", 
                 keyword, boards.getTotalElements());
@@ -200,11 +202,83 @@ public class BoardService {
     public void deleteBoard(Long boardNo) {
         log.info("게시글 삭제 요청 - 게시글 번호: {}", boardNo);
         
+        boardRepository.findById(boardNo)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        
+        boardRepository.updateIsActive(boardNo, false);
+        log.info("게시글 삭제 완료 - 게시글 번호: {}", boardNo);
+    }
+    
+    /**
+     * 게시글 비활성화
+     * 
+     * 게시글과 관련 댓글들을 비활성화하여 화면에 표시되지 않도록 합니다.
+     * 관리자 또는 작성자만 가능합니다.
+     * 
+     * @param boardNo 게시글 번호
+     * @param userNo 요청한 사용자 번호
+     * @throws IllegalArgumentException 게시글을 찾을 수 없는 경우
+     * @throws RuntimeException 권한이 없는 경우
+     */
+    @Transactional
+    public void deactivateBoard(Long boardNo, Long userNo) {
+        log.info("게시글 비활성화 요청 - 게시글 번호: {}, 사용자 번호: {}", boardNo, userNo);
+        
         Board board = boardRepository.findById(boardNo)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         
-        boardRepository.updateStatus(boardNo, Board.BoardStatus.DELETED);
-        log.info("게시글 삭제 완료 - 게시글 번호: {}", boardNo);
+        User user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        
+        // 권한 검증: 관리자이거나 작성자인지 확인
+        if (!user.getUserRole().equals(User.UserRole.ADMIN) && 
+            !board.getAuthor().getUserNo().equals(userNo)) {
+            throw new RuntimeException("게시글을 비활성화할 권한이 없습니다.");
+        }
+        
+        // 게시글 비활성화
+        boardRepository.deactivateBoard(boardNo);
+        
+        // 관련 댓글들 비활성화
+        commentRepository.deactivateAllByBoardNo(boardNo);
+        
+        log.info("게시글 비활성화 완료 - 게시글 번호: {}", boardNo);
+    }
+    
+    /**
+     * 게시글 활성화
+     * 
+     * 비활성화된 게시글과 관련 댓글들을 활성화하여 화면에 표시되도록 합니다.
+     * 관리자 또는 작성자만 가능합니다.
+     * 
+     * @param boardNo 게시글 번호
+     * @param userNo 요청한 사용자 번호
+     * @throws IllegalArgumentException 게시글을 찾을 수 없는 경우
+     * @throws RuntimeException 권한이 없는 경우
+     */
+    @Transactional
+    public void activateBoard(Long boardNo, Long userNo) {
+        log.info("게시글 활성화 요청 - 게시글 번호: {}, 사용자 번호: {}", boardNo, userNo);
+        
+        Board board = boardRepository.findById(boardNo)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        
+        User user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        
+        // 권한 검증: 관리자이거나 작성자인지 확인
+        if (!user.getUserRole().equals(User.UserRole.ADMIN) && 
+            !board.getAuthor().getUserNo().equals(userNo)) {
+            throw new RuntimeException("게시글을 활성화할 권한이 없습니다.");
+        }
+        
+        // 게시글 활성화
+        boardRepository.activateBoard(boardNo);
+        
+        // 관련 댓글들 활성화
+        commentRepository.activateAllByBoardNo(boardNo);
+        
+        log.info("게시글 활성화 완료 - 게시글 번호: {}", boardNo);
     }
 
     /**
@@ -283,8 +357,8 @@ public class BoardService {
     public Page<Board> getPopularBoards(Pageable pageable) {
         log.info("인기 게시글 조회 요청");
         
-        Page<Board> boards = boardRepository.findByStatusOrderByViewCountDescCreatedAtDesc(
-                Board.BoardStatus.ACTIVE, pageable);
+        Page<Board> boards = boardRepository.findByIsActiveOrderByViewCountDescCreatedAtDesc(
+                true, pageable);
         
         log.info("인기 게시글 조회 완료 - 개수: {}", boards.getTotalElements());
         return boards;
@@ -306,8 +380,8 @@ public class BoardService {
         User author = userRepository.findById(userNo)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         
-        Page<Board> boards = boardRepository.findByAuthorAndStatusOrderByCreatedAtDesc(
-                author, Board.BoardStatus.ACTIVE, pageable);
+        Page<Board> boards = boardRepository.findByAuthorAndIsActiveOrderByCreatedAtDesc(
+                author, true, pageable);
         
         log.info("작성자별 게시글 조회 완료 - 사용자: {}, 개수: {}", 
                 author.getNickname(), boards.getTotalElements());
@@ -324,9 +398,9 @@ public class BoardService {
     public BoardStatistics getBoardStatistics() {
         log.info("게시글 통계 조회 요청");
         
-        long totalBoards = boardRepository.countByStatus(Board.BoardStatus.ACTIVE);
-        long generalBoards = boardRepository.countByCategoryAndStatus("일반", Board.BoardStatus.ACTIVE);
-        long noticeBoards = boardRepository.countByCategoryAndStatus("공지", Board.BoardStatus.ACTIVE);
+        long totalBoards = boardRepository.countByIsActive(true);
+        long generalBoards = boardRepository.countByCategoryAndIsActive("일반", true);
+        long noticeBoards = boardRepository.countByCategoryAndIsActive("공지", true);
         
         BoardStatistics statistics = BoardStatistics.builder()
                 .totalBoards(totalBoards)

@@ -46,14 +46,9 @@ public class BoardResponse {
     private String category;
     
     /**
-     * 작성자 닉네임
+     * 작성자 정보
      */
-    private String authorNickname;
-    
-    /**
-     * 작성자 마스킹된 이메일
-     */
-    private String authorMaskedEmail;
+    private AuthorInfo author;
     
     /**
      * 조회수
@@ -74,6 +69,11 @@ public class BoardResponse {
      * 게시글 상태
      */
     private Board.BoardStatus status;
+    
+    /**
+     * 게시글 활성화 상태
+     */
+    private boolean isActive;
     
     /**
      * 생성일시
@@ -97,12 +97,12 @@ public class BoardResponse {
                 .title(board.getTitle())
                 .content(board.getContent())
                 .category(board.getCategory())
-                .authorNickname(board.getAuthorNickname())
-                .authorMaskedEmail(board.getAuthorMaskedEmail())
+                .author(AuthorInfo.from(board.getAuthor()))
                 .viewCount(board.getViewCount())
                 .likeCount(board.getLikeCount())
                 .commentCount(board.getCommentCount())
                 .status(board.getStatus())
+                .isActive(board.isActive())
                 .createdAt(board.getCreatedAt())
                 .updatedAt(board.getUpdatedAt())
                 .build();
@@ -153,5 +153,31 @@ public class BoardResponse {
      */
     public boolean isDeleted() {
         return status == Board.BoardStatus.DELETED;
+    }
+    
+    /**
+     * 작성자 정보 DTO
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AuthorInfo {
+        private Long userNo;
+        private String nickname;
+        private String email;
+        private String userRole;
+        
+        public static AuthorInfo from(com.prj.cursor.entity.User user) {
+            if (user == null) {
+                return null;
+            }
+            return AuthorInfo.builder()
+                    .userNo(user.getUserNo())
+                    .nickname(user.getNickname())
+                    .email(user.getEmail())
+                    .userRole(user.getUserRole().toString())
+                    .build();
+        }
     }
 } 
