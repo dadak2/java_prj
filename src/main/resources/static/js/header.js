@@ -82,6 +82,9 @@ function displayUserInfo() {
     }
 }
 
+// 전역으로 사용할 수 있도록 window 객체에 할당
+window.displayUserInfo = displayUserInfo;
+
 /**
  * 로그인된 사용자 UI 표시
  */
@@ -111,6 +114,8 @@ function setActiveNavigation() {
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-link');
     
+    console.log('현재 경로:', currentPath);
+    
     // 모든 네비게이션 링크에서 active 클래스 제거
     navLinks.forEach(link => {
         link.classList.remove('active');
@@ -119,18 +124,27 @@ function setActiveNavigation() {
     // 현재 페이지에 맞는 네비게이션 활성화
     if (currentPath === '/' || currentPath === '/board.html') {
         const boardLink = document.getElementById('nav-board');
-        if (boardLink) boardLink.classList.add('active');
-    } else if (currentPath === '/write.html') {
-        const writeLink = document.getElementById('nav-write');
-        if (writeLink) writeLink.classList.add('active');
-    } else if (currentPath === '/profile.html') {
-        const profileLink = document.getElementById('nav-profile');
-        if (profileLink) profileLink.classList.add('active');
+        if (boardLink) {
+            boardLink.classList.add('active');
+            console.log('게시판 링크 활성화');
+        }
+    } else if (currentPath === '/game.html') {
+        const gameLink = document.getElementById('nav-game');
+        if (gameLink) {
+            gameLink.classList.add('active');
+            console.log('게임 링크 활성화');
+        }
+    } else if (currentPath === '/news.html') {
+        const newsLink = document.getElementById('nav-news');
+        if (newsLink) {
+            newsLink.classList.add('active');
+            console.log('뉴스 링크 활성화');
+        }
     }
 }
 
 /**
- * 로그인 페이지로 이동
+ * 로그인 처리
  */
 function goToLogin() {
     // login-modal.js가 로드되어 있으면 모달 표시
@@ -160,17 +174,19 @@ function logout() {
             localStorage.removeItem('userInfo');
             localStorage.removeItem('savedLoginInfo');
             
-            showModal('로그아웃 완료', '로그아웃되었습니다. 게시판 페이지로 이동합니다.', 'success');
+            showModal('로그아웃 완료', '로그아웃되었습니다.', 'success');
             
+            // 현재 페이지에서 사용자 정보만 업데이트
             setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
+                displayUserInfo();
+                closeModal();
+            }, 1500);
         };
     } else {
         // 모달이 없는 경우 바로 로그아웃
         localStorage.removeItem('userInfo');
         localStorage.removeItem('savedLoginInfo');
-        window.location.href = '/';
+        displayUserInfo();
     }
 }
 

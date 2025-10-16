@@ -8,7 +8,7 @@
 }
 
 .header-content {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
@@ -80,7 +80,7 @@
 #userNickname {
     color: #667eea;
     font-weight: 600;
-    margin-right: 10px;
+    margin-right: 0px;
     cursor: pointer;
     text-decoration: underline;
     transition: color 0.3s ease;
@@ -128,7 +128,7 @@
 }
 
 .login-btn:active {
-    transform: none;
+    transform: none;transform: none;
     background: #5a6fd8;
 }
 

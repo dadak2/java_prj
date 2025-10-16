@@ -8,9 +8,6 @@
             <a href="/" class="nav-link" id="nav-board">
                 <i class="fas fa-list"></i> 게시판
             </a>
-            <a href="/write.html" class="nav-link" id="nav-write">
-                <i class="fas fa-edit"></i> 글쓰기
-            </a>
             <a href="/game.html" class="nav-link" id="nav-game">
                 <i class="fas fa-gamepad"></i> 게임
             </a>
@@ -27,7 +24,10 @@
             </div>
             <!-- 로그인한 사용자용 UI -->
             <div id="loggedInUI" style="display: none;">
-                <span id="userNickname">사용자</span>님 <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                <span id="userNickname">사용자</span>님 
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </div>
