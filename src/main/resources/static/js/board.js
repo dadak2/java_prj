@@ -37,7 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('게시판 페이지 로드됨');
     
     // 사용자 정보 표시
-    displayUserInfo();
+    if (typeof displayUserInfo === 'function') {
+        displayUserInfo();
+    }
     
     // 실제 게시글 데이터 로드
     loadPosts();
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * 로그인 성공 후 처리
  */
 function onLoginSuccess(data) {
-    // 사용자 정보 업데이트 (common.js의 함수 사용)
+    // 사용자 정보 업데이트
     if (typeof displayUserInfo === 'function') {
         displayUserInfo();
     }
