@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_follows", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "category"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"followerId", "category"}))
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,7 +23,7 @@ public class UserFollow {
     private Long id;
     
     @Column(nullable = false)
-    private Long userId;
+    private Long followerId;
     
     @Column(nullable = false, length = 100)
     private String category;

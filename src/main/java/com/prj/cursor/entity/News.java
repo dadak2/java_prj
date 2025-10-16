@@ -40,11 +40,17 @@ public class News {
     @Column(length = 50)
     private String author;
     
+    @Column
+    private Long authorId;
+    
     @Column(nullable = false)
     private Integer viewCount = 0;
     
     @Column(nullable = false)
     private Integer likeCount = 0;
+    
+    @Column(nullable = false)
+    private Integer commentCount = 0;
     
     @Column(nullable = false)
     private Boolean isPublished = true;

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>뉴스 피드</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/news.css?v=1.0">
+    <link rel="stylesheet" href="/css/login-modal.css?v=1.0">
+</head>
+
+<body>
+    <!-- 헤더 컨테이너 -->
+    <div id="header-container"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        <div class="news-container">
+            <!-- 뉴스 피드 헤더 -->
+            <div class="news-header">
+                <h1><i class="fas fa-newspaper"></i> 뉴스 피드</h1>
+                <div class="news-controls">
+                    <button id="refreshBtn" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 새로고침
+                    </button>
+                    <button id="followBtn" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i> 팔로우 관리
+                    </button>
+                </div>
+            </div>
+
+            <!-- 필터 및 정렬 -->
+            <div class="news-filters">
+                <div class="filter-group">
+                    <label for="categoryFilter">카테고리:</label>
+                    <select id="categoryFilter">
+                        <option value="">전체</option>
+                        <option value="TECH">기술</option>
+                        <option value="SPORTS">스포츠</option>
+                        <option value="POLITICS">정치</option>
+                        <option value="BUSINESS">비즈니스</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sortBy">정렬:</label>
+                    <select id="sortBy">
+                        <option value="latest">최신순</option>
+                        <option value="popular">인기순</option>
+                        <option value="followed">팔로우한 주제</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 뉴스 목록 -->
+            <div class="news-list" id="newsList">
+                <!-- 뉴스 아이템들이 여기에 동적으로 로드됩니다 -->
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="pagination">
+                <!-- 페이지네이션 버튼들이 여기에 동적으로 생성됩니다 -->
+            </div>
+
+            <!-- 로딩 인디케이터 -->
+            <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> 뉴스를 불러오는 중...
+            </div>
+        </div>
+    </main>
+
+    <!-- 팔로우 관리 모달 -->
+    <div id="newsFollowModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> 팔로우 관리</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="follow-categories">
+                    <h4>팔로우할 카테고리 선택</h4>
+                    <div class="category-checkboxes">
+                        <label><input type="checkbox" value="TECH"> 기술</label>
+                        <label><input type="checkbox" value="SPORTS"> 스포츠</label>
+                        <label><input type="checkbox" value="POLITICS"> 정치</label>
+                        <label><input type="checkbox" value="BUSINESS"> 비즈니스</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveFollowBtn" class="btn btn-primary">저장</button>
+                <button id="cancelFollowBtn" class="btn btn-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메시지 모달 -->
+    <div id="newsMessageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="newsModalTitle">알림</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="newsModalMessage">메시지가 여기에 표시됩니다.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="newsModalBtn" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 컨테이너 -->
+    <div id="footer-container"></div>
+
+    <!-- 메시지 모달 -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBtn" onclick="closeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 스크립트 -->
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
+    <script src="/js/news.js?v=1.0"></script>
+</body>
+</html>
