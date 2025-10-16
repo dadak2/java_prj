@@ -1,10 +1,6 @@
-# 🚀 Cursor Project
-
-Cursor활용 Spring Boot 기반의 사용자 인증, 게시판 시스템 및 실시간 랭킹 게임
-
 ## 📋 프로젝트 개요
 
-Cursor Project는 Spring Boot 3.5.4를 기반으로 한 웹 애플리케이션으로, 사용자 인증 시스템과 게시판 기능을 제공
+Spring Boot 3.5.4를 기반으로 한 웹 애플리케이션으로, 사용자 인증 시스템과 게시판 기능을 제공
 JPA를 사용한 데이터베이스 연동과 Spring Security를 통한 보안 기능을 포함
 
 ## 🛠 기술 스택
