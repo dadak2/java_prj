@@ -21,4 +21,7 @@ public interface GameScoreRepository extends JpaRepository<GameScore, Long> {
     
     @Query("SELECT COUNT(gs) FROM GameScore gs WHERE gs.gameType = :gameType")
     Long countByGameType(@Param("gameType") String gameType);
+    
+    @Query("SELECT gs FROM GameScore gs WHERE gs.gameType = :gameType ORDER BY gs.score DESC")
+    List<GameScore> findTopByGameTypeOrderByScoreDesc(@Param("gameType") String gameType, org.springframework.data.domain.Pageable pageable);
 }

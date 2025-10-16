@@ -14,6 +14,7 @@ class SnakeGame {
         this.isPlaying = false;
         this.gameLoop = null;
         this.gameType = 'snake';
+        this.isWebSocketConnected = false;
         
         this.initWebSocket();
         this.initEventListeners();
@@ -22,20 +23,79 @@ class SnakeGame {
     }
     
     initWebSocket() {
-        this.socket = new SockJS('/ws');
-        this.stompClient = Stomp.over(this.socket);
-        
-        this.stompClient.connect({}, (frame) => {
-            console.log('WebSocket 연결됨: ' + frame);
+        try {
+            this.socket = new SockJS('/ws');
+            this.stompClient = Stomp.over(this.socket);
             
-            // 실시간 랭킹 구독
-            this.stompClient.subscribe('/topic/rankings/' + this.gameType, (message) => {
-                const rankings = JSON.parse(message.body);
-                this.updateRankingDisplay(rankings);
-            });
-        }, (error) => {
-            console.error('WebSocket 연결 실패:', error);
-        });
+            // 연결 옵션 설정
+            const connectOptions = {
+                onConnect: (frame) => {
+                    console.log('WebSocket 연결됨: ' + frame);
+                    this.isWebSocketConnected = true;
+                    this.updateConnectionStatus('connected');
+                    
+                    // 실시간 랭킹 구독
+                    this.stompClient.subscribe('/topic/rankings/' + this.gameType, (message) => {
+                        try {
+                            const rankings = JSON.parse(message.body);
+                            console.log('실시간 랭킹 수신:', rankings);
+                            this.updateRankingDisplay(rankings);
+                        } catch (error) {
+                            console.error('랭킹 데이터 파싱 오류:', error);
+                        }
+                    });
+                    
+                    // 초기 랭킹 요청
+                    this.requestRankings();
+                },
+                onStompError: (error) => {
+                    console.error('STOMP 오류:', error);
+                    this.isWebSocketConnected = false;
+                    this.updateConnectionStatus('disconnected');
+                },
+                onWebSocketError: (error) => {
+                    console.error('WebSocket 오류:', error);
+                    this.isWebSocketConnected = false;
+                    this.updateConnectionStatus('disconnected');
+                }
+            };
+            
+            this.stompClient.connect(connectOptions);
+            
+        } catch (error) {
+            console.error('WebSocket 초기화 실패:', error);
+            this.isWebSocketConnected = false;
+        }
+    }
+    
+    /**
+     * 랭킹 요청
+     */
+    requestRankings() {
+        if (this.isWebSocketConnected && this.stompClient) {
+            this.stompClient.send('/app/game/rankings', {}, this.gameType);
+        }
+    }
+    
+    /**
+     * 연결 상태 업데이트
+     */
+    updateConnectionStatus(status) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            statusElement.className = `connection-status ${status}`;
+            switch(status) {
+                case 'connected':
+                    statusElement.textContent = '실시간 연결됨';
+                    break;
+                case 'disconnected':
+                    statusElement.textContent = '연결 끊김';
+                    break;
+                case 'connecting':
+                    statusElement.textContent = '연결 중...';
+                    break;
+            }
+        }
     }
     
     initEventListeners() {

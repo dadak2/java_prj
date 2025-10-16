@@ -1,5 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    width: 100%;
+}
+
 /* 게임 페이지 스타일 */
 .game-container {
+    flex: 1;
     display: flex;
     gap: 30px;
     max-width: 1200px;
@@ -41,6 +63,31 @@
     font-weight: bold;
     margin-bottom: 15px;
     color: #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.connection-status {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: normal;
+}
+
+.connection-status.connected {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.connection-status.disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.connection-status.connecting {
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 .game-controls {
@@ -195,98 +242,4 @@
     }
 }
 
-/* 모달 스타일 */
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.close {
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #aaa;
-}
-
-.close:hover {
-    color: #000;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #333;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.login-btn, .signup-btn {
-    width: 100%;
-    padding: 12px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.login-btn:hover, .signup-btn:hover {
-    background: #5a6fd8;
-}
-
-.modal-content p {
-    text-align: center;
-    margin-top: 15px;
-    color: #666;
-}
-
-.modal-content a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.modal-content a:hover {
-    text-decoration: underline;
-}
+/* 모달 스타일은 login-modal.css에서 관리 */

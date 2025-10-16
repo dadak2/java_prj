@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게임 - Cursor Project</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>게임</title>
     <link rel="stylesheet" href="/css/header.css?v=1.0">
     <link rel="stylesheet" href="/css/footer.css?v=1.0">
-    <link rel="stylesheet" href="/css/board.css?v=1.0">
     <link rel="stylesheet" href="/css/game.css?v=1.0">
+    <link rel="stylesheet" href="/css/login-modal.css?v=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -24,6 +27,7 @@
                     <div class="game-ui">
                         <div class="score-display">
                             <span>점수: <span id="currentScore">0</span></span>
+                            <span id="connectionStatus" class="connection-status">연결 중...</span>
                         </div>
                         <div class="game-controls">
                             <button id="startBtn" class="game-btn">게임 시작</button>
@@ -48,47 +52,18 @@
         <div id="footer-container"></div>
     </div>
     
-    <!-- 로그인 모달 -->
-    <div id="loginModal" class="modal" style="display: none;">
+    <!-- 메시지 모달 -->
+    <div id="messageModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>로그인</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">이메일:</label>
-                    <input type="email" id="loginEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">비밀번호:</label>
-                    <input type="password" id="loginPassword" name="password" required>
-                </div>
-                <button type="submit" class="login-btn">로그인</button>
-            </form>
-            <p>계정이 없으신가요? <a href="#" onclick="showSignupModal()">회원가입</a></p>
-        </div>
-    </div>
-    
-    <!-- 회원가입 모달 -->
-    <div id="signupModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>회원가입</h2>
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="signupEmail">이메일:</label>
-                    <input type="email" id="signupEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupPassword">비밀번호:</label>
-                    <input type="password" id="signupPassword" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupNickname">닉네임:</label>
-                    <input type="text" id="signupNickname" name="nickname" required>
-                </div>
-                <button type="submit" class="signup-btn">회원가입</button>
-            </form>
-            <p>이미 계정이 있으신가요? <a href="#" onclick="showLoginModal()">로그인</a></p>
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalBtn" onclick="closeModal()">확인</button>
+            </div>
         </div>
     </div>
     

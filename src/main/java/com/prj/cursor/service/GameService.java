@@ -6,6 +6,8 @@ import com.prj.cursor.entity.GameScore;
 import com.prj.cursor.repository.GameScoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,13 +20,17 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class GameService {
     
-    private final GameScoreRepository gameScoreRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Autowired
+    private GameScoreRepository gameScoreRepository;
+    
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+    
+    @Autowired(required = false)
+    private KafkaTemplate<String, Object> kafkaTemplate;
     
     @Transactional
     public void submitScore(Long userId, String nickname, Integer score, String gameType) {
@@ -41,17 +47,28 @@ public class GameService {
             log.info("점수 저장 완료: userId={}, nickname={}, score={}, gameType={}", 
                     userId, nickname, score, gameType);
             
-            // 2. Kafka로 점수 이벤트 전송
-            ScoreEvent scoreEvent = ScoreEvent.builder()
-                    .userId(userId)
-                    .nickname(nickname)
-                    .score(score)
-                    .gameType(gameType)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
+            // 2. Redis에 직접 랭킹 업데이트 (Kafka 없이)
+            updateRankingDirectly(userId, nickname, score, gameType);
             
-            kafkaTemplate.send("game-scores", scoreEvent);
-            log.info("Kafka 이벤트 전송 완료: {}", scoreEvent);
+            // 3. Kafka로 점수 이벤트 전송 (선택적)
+            if (kafkaTemplate != null) {
+                try {
+                    ScoreEvent scoreEvent = ScoreEvent.builder()
+                            .userId(userId)
+                            .nickname(nickname)
+                            .score(score)
+                            .gameType(gameType)
+                            .timestamp(System.currentTimeMillis())
+                            .build();
+                    
+                    kafkaTemplate.send("game-scores", scoreEvent);
+                    log.info("Kafka 이벤트 전송 완료: {}", scoreEvent);
+                } catch (Exception kafkaError) {
+                    log.warn("Kafka 전송 실패, Redis만 업데이트: {}", kafkaError.getMessage());
+                }
+            } else {
+                log.info("Kafka가 설정되지 않음, Redis만 업데이트");
+            }
             
         } catch (Exception e) {
             log.error("점수 제출 중 오류 발생: userId={}, score={}", userId, score, e);
@@ -59,37 +76,96 @@ public class GameService {
         }
     }
     
-    public List<RankingEntry> getTopRankings(String gameType, int limit) {
+    /**
+     * Redis에 직접 랭킹 업데이트 (Kafka 없이)
+     */
+    private void updateRankingDirectly(Long userId, String nickname, Integer score, String gameType) {
         try {
             String key = "ranking:" + gameType;
             ZSetOperations<String, Object> zSetOps = redisTemplate.opsForZSet();
             
-            // Redis에서 상위 랭킹 조회
-            Set<ZSetOperations.TypedTuple<Object>> rankings = zSetOps.reverseRangeWithScores(key, 0, limit - 1);
+            // Redis에 점수 업데이트 (닉네임을 멤버로, 점수를 스코어로)
+            zSetOps.add(key, nickname, score);
+            
+            // 상위 1000명만 유지 (메모리 절약)
+            zSetOps.removeRange(key, 0, -1001);
+            
+            log.info("Redis 랭킹 직접 업데이트 완료: nickname={}, score={}, gameType={}", 
+                    nickname, score, gameType);
+            
+        } catch (Exception e) {
+            log.warn("Redis 직접 업데이트 실패: {}", e.getMessage());
+        }
+    }
+    
+    public List<RankingEntry> getTopRankings(String gameType, int limit) {
+        try {
+            // Redis 연결 시도
+            String key = "ranking:" + gameType;
+            ZSetOperations<String, Object> zSetOps = redisTemplate.opsForZSet();
+            
+            // Redis에서 상위 랭킹 조회 (RedisTestController와 같은 방식)
+            Set<Object> rankings = zSetOps.reverseRange(key, 0, limit - 1);
             
             List<RankingEntry> result = new ArrayList<>();
             int rank = 1;
             
-            for (ZSetOperations.TypedTuple<Object> ranking : rankings) {
-                String nickname = (String) ranking.getValue();
-                Double score = ranking.getScore();
-                
-                if (nickname != null && score != null) {
-                    RankingEntry entry = RankingEntry.builder()
-                            .nickname(nickname)
-                            .score(score.intValue())
-                            .rank(rank++)
-                            .playedAt(LocalDateTime.now())
-                            .build();
-                    result.add(entry);
+            if (rankings != null && !rankings.isEmpty()) {
+                for (Object ranking : rankings) {
+                    String nickname = (String) ranking;
+                    
+                    if (nickname != null) {
+                        // 점수는 별도로 조회
+                        Double score = zSetOps.score(key, nickname);
+                        
+                        RankingEntry entry = RankingEntry.builder()
+                                .nickname(nickname)
+                                .score(score != null ? score.intValue() : 0)
+                                .rank(rank++)
+                                .playedAt(LocalDateTime.now())
+                                .build();
+                        result.add(entry);
+                    }
                 }
+                log.info("Redis 랭킹 조회 완료: gameType={}, count={}", gameType, result.size());
+                return result;
+            } else {
+                log.info("Redis에 랭킹 데이터가 없음. DB에서 조회합니다.");
+                return getRankingsFromDatabase(gameType, limit);
             }
             
-            log.info("랭킹 조회 완료: gameType={}, count={}", gameType, result.size());
+        } catch (Exception e) {
+            log.warn("Redis 랭킹 조회 실패, DB에서 조회합니다: gameType={}, error={}", gameType, e.getMessage());
+            return getRankingsFromDatabase(gameType, limit);
+        }
+    }
+    
+    /**
+     * DB에서 랭킹 조회 (Redis 연결 실패 시 대체)
+     */
+    private List<RankingEntry> getRankingsFromDatabase(String gameType, int limit) {
+        try {
+            List<GameScore> scores = gameScoreRepository.findTopByGameTypeOrderByScoreDesc(gameType, 
+                org.springframework.data.domain.PageRequest.of(0, limit));
+            
+            List<RankingEntry> result = new ArrayList<>();
+            int rank = 1;
+            
+            for (GameScore score : scores) {
+                RankingEntry entry = RankingEntry.builder()
+                        .nickname(score.getNickname())
+                        .score(score.getScore())
+                        .rank(rank++)
+                        .playedAt(score.getCreatedAt())
+                        .build();
+                result.add(entry);
+            }
+            
+            log.info("DB 랭킹 조회 완료: gameType={}, count={}", gameType, result.size());
             return result;
             
         } catch (Exception e) {
-            log.error("랭킹 조회 중 오류 발생: gameType={}", gameType, e);
+            log.error("DB 랭킹 조회 중 오류 발생: gameType={}", gameType, e);
             return new ArrayList<>();
         }
     }
