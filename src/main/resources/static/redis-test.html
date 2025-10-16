@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis 연결 테스트</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/login-modal.css?v=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .info {
+            color: #17a2b8;
+        }
+        
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+        
+        .rank {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .nickname {
+            flex: 1;
+            margin: 0 15px;
+        }
+        
+        .score {
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+    
+    <div class="container">
+        <div class="test-card">
+            <h1 class="test-title">🔧 Redis 연결 테스트</h1>
+            
+            <div>
+                <button class="test-button" onclick="testConnection()">Redis 연결 테스트</button>
+                <button class="test-button" onclick="createTestData()">테스트 데이터 생성</button>
+                <button class="test-button" onclick="getRanking()">랭킹 조회</button>
+                <button class="test-button" onclick="clearData()">데이터 초기화</button>
+            </div>
+            
+            <div class="result-area" id="resultArea">
+                Redis 연결 테스트를 시작하려면 위의 버튼을 클릭하세요.
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2 class="test-title">🎮 게임 랭킹 시스템 테스트</h2>
+            
+            <div>
+                <button class="test-button" onclick="testGameRanking()">게임 랭킹 테스트</button>
+                <button class="test-button" onclick="submitTestScore()">테스트 점수 제출</button>
+            </div>
+            
+            <div class="result-area" id="gameResultArea">
+                게임 랭킹 시스템을 테스트하려면 위의 버튼을 클릭하세요.
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer-container"></div>
+    
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
+    
+    <script>
+        const resultArea = document.getElementById('resultArea');
+        const gameResultArea = document.getElementById('gameResultArea');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            resultArea.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            resultArea.scrollTop = resultArea.scrollHeight;
+        }
+        
+        function gameLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            gameResultArea.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            gameResultArea.scrollTop = gameResultArea.scrollHeight;
+        }
+        
+        async function testConnection() {
+            log('Redis 연결 테스트 시작...', 'info');
+            
+            try {
+                const response = await fetch('/api/redis/test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ ${data.message}`, 'success');
+                    log(`테스트 값: ${data.testValue}`, 'info');
+                } else {
+                    log(`❌ ${data.message}`, 'error');
+                    if (data.error) {
+                        log(`오류 타입: ${data.error}`, 'error');
+                    }
+                }
+            } catch (error) {
+                log(`❌ 연결 실패: ${error.message}`, 'error');
+            }
+        }
+        
+        async function createTestData() {
+            log('테스트 랭킹 데이터 생성 중...', 'info');
+            
+            try {
+                const response = await fetch('/api/redis/ranking/test', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ ${data.message}`, 'success');
+                    log(`생성된 랭킹: ${JSON.stringify(data.rankings)}`, 'info');
+                } else {
+                    log(`❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 데이터 생성 실패: ${error.message}`, 'error');
+            }
+        }
+        
+        async function getRanking() {
+            log('랭킹 조회 중...', 'info');
+            
+            try {
+                const response = await fetch('/api/redis/ranking');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ 랭킹 조회 성공 (총 ${data.totalCount}개)`, 'success');
+                    
+                    if (data.rankings && data.rankings.length > 0) {
+                        log('랭킹 목록:', 'info');
+                        data.rankings.forEach((ranking, index) => {
+                            log(`${index + 1}. ${ranking}`, 'info');
+                        });
+                    } else {
+                        log('랭킹 데이터가 없습니다.', 'info');
+                    }
+                } else {
+                    log(`❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 랭킹 조회 실패: ${error.message}`, 'error');
+            }
+        }
+        
+        async function clearData() {
+            log('데이터 초기화 중...', 'info');
+            
+            try {
+                const response = await fetch('/api/redis/clear', {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ ${data.message}`, 'success');
+                } else {
+                    log(`❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 데이터 초기화 실패: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGameRanking() {
+            gameLog('게임 랭킹 시스템 테스트 시작...', 'info');
+            
+            try {
+                const response = await fetch('/api/game/rankings/snake?limit=10');
+                const rankings = await response.json();
+                
+                if (Array.isArray(rankings)) {
+                    gameLog(`✅ 게임 랭킹 조회 성공 (${rankings.length}개)`, 'success');
+                    
+                    if (rankings.length > 0) {
+                        gameLog('게임 랭킹:', 'info');
+                        rankings.forEach(ranking => {
+                            gameLog(`${ranking.rank}. ${ranking.nickname} - ${ranking.score}점`, 'info');
+                        });
+                    } else {
+                        gameLog('게임 랭킹 데이터가 없습니다.', 'info');
+                    }
+                } else {
+                    gameLog('❌ 랭킹 데이터 형식 오류', 'error');
+                }
+            } catch (error) {
+                gameLog(`❌ 게임 랭킹 조회 실패: ${error.message}`, 'error');
+            }
+        }
+        
+        async function submitTestScore() {
+            gameLog('테스트 점수 제출 중...', 'info');
+            
+            const testScore = {
+                userId: 1,
+                nickname: '테스트플레이어',
+                score: Math.floor(Math.random() * 1000) + 500,
+                gameType: 'snake'
+            };
+            
+            try {
+                const response = await fetch('/api/game/score', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testScore)
+                });
+                
+                const result = await response.text();
+                
+                if (response.ok) {
+                    gameLog(`✅ 점수 제출 성공: ${testScore.nickname} - ${testScore.score}점`, 'success');
+                    gameLog(`서버 응답: ${result}`, 'info');
+                } else {
+                    gameLog(`❌ 점수 제출 실패: ${result}`, 'error');
+                }
+            } catch (error) {
+                gameLog(`❌ 점수 제출 오류: ${error.message}`, 'error');
+            }
+        }
+        
+        // 페이지 로드 시 자동으로 연결 테스트
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                log('페이지 로드 완료. Redis 연결 테스트를 시작합니다.', 'info');
+                testConnection();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 연결 테스트</title>
+    <link rel="stylesheet" href="/css/header.css?v=1.0">
+    <link rel="stylesheet" href="/css/footer.css?v=1.0">
+    <link rel="stylesheet" href="/css/login-modal.css?v=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-area {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .info {
+            color: #17a2b8;
+        }
+        
+        .connection-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .connecting {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+    
+    <div class="container">
+        <div class="test-card">
+            <h1 class="test-title">🔌 WebSocket 연결 테스트</h1>
+            
+            <div>
+                <button class="test-button" onclick="connectWebSocket()">WebSocket 연결</button>
+                <button class="test-button" onclick="disconnectWebSocket()">연결 끊기</button>
+                <button class="test-button" onclick="sendTestScore()">테스트 점수 전송</button>
+                <button class="test-button" onclick="requestRankings()">랭킹 요청</button>
+            </div>
+            
+            <div>
+                <span>연결 상태: </span>
+                <span id="connectionStatus" class="connection-status disconnected">연결 안됨</span>
+            </div>
+            
+            <div class="result-area" id="resultArea">
+                WebSocket 연결 테스트를 시작하려면 위의 버튼을 클릭하세요.
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2 class="test-title">📊 실시간 랭킹</h2>
+            <div id="rankingList" class="result-area">
+                랭킹 데이터가 여기에 표시됩니다.
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer-container"></div>
+    
+    <script src="/js/header.js?v=1.0"></script>
+    <script src="/js/footer.js?v=1.0"></script>
+    <script src="/js/common.js?v=1.0"></script>
+    <script src="/js/login-modal.js?v=1.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+    <script>
+        let socket = null;
+        let stompClient = null;
+        let isConnected = false;
+        
+        const resultArea = document.getElementById('resultArea');
+        const rankingList = document.getElementById('rankingList');
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            resultArea.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            resultArea.scrollTop = resultArea.scrollHeight;
+        }
+        
+        function updateConnectionStatus(status) {
+            connectionStatus.className = `connection-status ${status}`;
+            switch(status) {
+                case 'connected':
+                    connectionStatus.textContent = '연결됨';
+                    break;
+                case 'disconnected':
+                    connectionStatus.textContent = '연결 안됨';
+                    break;
+                case 'connecting':
+                    connectionStatus.textContent = '연결 중...';
+                    break;
+            }
+        }
+        
+        function connectWebSocket() {
+            if (isConnected) {
+                log('이미 연결되어 있습니다.', 'info');
+                return;
+            }
+            
+            log('WebSocket 연결 시도 중...', 'info');
+            updateConnectionStatus('connecting');
+            
+            try {
+                socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+                
+                const connectOptions = {
+                    onConnect: (frame) => {
+                        log('WebSocket 연결 성공!', 'success');
+                        isConnected = true;
+                        updateConnectionStatus('connected');
+                        
+                        // 랭킹 구독
+                        stompClient.subscribe('/topic/rankings/snake', (message) => {
+                            try {
+                                const rankings = JSON.parse(message.body);
+                                log('실시간 랭킹 수신: ' + rankings.length + '개', 'success');
+                                updateRankingDisplay(rankings);
+                            } catch (error) {
+                                log('랭킹 데이터 파싱 오류: ' + error.message, 'error');
+                            }
+                        });
+                        
+                        log('랭킹 구독 시작됨', 'info');
+                    },
+                    onStompError: (error) => {
+                        log('STOMP 오류: ' + error, 'error');
+                        isConnected = false;
+                        updateConnectionStatus('disconnected');
+                    },
+                    onWebSocketError: (error) => {
+                        log('WebSocket 오류: ' + error, 'error');
+                        isConnected = false;
+                        updateConnectionStatus('disconnected');
+                    }
+                };
+                
+                stompClient.connect(connectOptions);
+                
+            } catch (error) {
+                log('WebSocket 초기화 실패: ' + error.message, 'error');
+                updateConnectionStatus('disconnected');
+            }
+        }
+        
+        function disconnectWebSocket() {
+            if (stompClient && isConnected) {
+                stompClient.disconnect();
+                isConnected = false;
+                updateConnectionStatus('disconnected');
+                log('WebSocket 연결 끊김', 'info');
+            } else {
+                log('연결된 WebSocket이 없습니다.', 'info');
+            }
+        }
+        
+        function sendTestScore() {
+            if (!isConnected) {
+                log('WebSocket이 연결되지 않았습니다. 먼저 연결하세요.', 'error');
+                return;
+            }
+            
+            const scoreData = {
+                userId: 1,
+                nickname: '테스트플레이어' + Math.floor(Math.random() * 1000),
+                score: Math.floor(Math.random() * 2000) + 500,
+                gameType: 'snake'
+            };
+            
+            log('점수 전송: ' + JSON.stringify(scoreData), 'info');
+            
+            try {
+                stompClient.send('/app/game/score', {}, JSON.stringify(scoreData));
+                log('점수 전송 완료', 'success');
+            } catch (error) {
+                log('점수 전송 실패: ' + error.message, 'error');
+            }
+        }
+        
+        function requestRankings() {
+            if (!isConnected) {
+                log('WebSocket이 연결되지 않았습니다. 먼저 연결하세요.', 'error');
+                return;
+            }
+            
+            log('랭킹 요청 중...', 'info');
+            
+            try {
+                stompClient.send('/app/game/rankings', {}, 'snake');
+                log('랭킹 요청 전송 완료', 'success');
+            } catch (error) {
+                log('랭킹 요청 실패: ' + error.message, 'error');
+            }
+        }
+        
+        function updateRankingDisplay(rankings) {
+            if (!rankings || rankings.length === 0) {
+                rankingList.innerHTML = '랭킹 데이터가 없습니다.';
+                return;
+            }
+            
+            let html = '실시간 랭킹:\n\n';
+            rankings.forEach((ranking, index) => {
+                html += `${ranking.rank}. ${ranking.nickname} - ${ranking.score}점\n`;
+            });
+            
+            rankingList.innerHTML = html;
+        }
+        
+        // 페이지 로드 시 자동 연결
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                log('페이지 로드 완료. WebSocket 연결을 시도합니다.', 'info');
+                connectWebSocket();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
